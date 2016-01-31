@@ -9,6 +9,16 @@ RUN yum -y install \
         socat \
     && yum clean all
 
+{% elif base_distro in ['opensuse', 'sles'] %}
+
+# kmod-compat --force to override modprobe deletion
+RUN zypper -n install --force \
+        kmod-compat \
+        net-tools \
+        keepalived \
+        socat \
+    && zypper clean -a
+
 {% elif base_distro in ['ubuntu', 'debian'] %}
 
 RUN apt-get install -y --no-install-recommends \

@@ -8,6 +8,11 @@ MAINTAINER {{ maintainer }}
 # the centos gate and we want to do multinode we can populate this container
 RUN /bin/true
 
+{% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
+    && /bin/false
+
 {% elif base_distro in ['ubuntu', 'debian'] %}
 
 RUN echo 'deb http://apt.dockerproject.org/repo ubuntu-trusty main' > /etc/apt/sources.list.d/docker.list \

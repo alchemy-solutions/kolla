@@ -7,6 +7,11 @@ MAINTAINER {{ maintainer }}
 RUN yum -y install openstack-heat-api \
     && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
+    && /bin/false
+
     {% elif base_distro in ['ubuntu'] %}
 
 RUN apt-get install -y --no-install-recommends \

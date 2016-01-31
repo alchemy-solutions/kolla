@@ -2,12 +2,21 @@ FROM {{ namespace }}/{{ image_prefix }}base:{{ tag }}
 MAINTAINER {{ maintainer }}
 
 {% if base_distro in ['fedora', 'centos', 'oraclelinux', 'rhel'] %}
+
 RUN yum -y install \
         git \
         iproute \
         mariadb-libs \
         openssl \
     && yum clean all
+
+{% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        git-core \
+        iproute2 \
+        openssl \
+    && zypper clean -a
 
 {% endif %}
 {% if install_type == 'binary' %}
@@ -34,6 +43,24 @@ RUN yum -y install \
         python-openstackclient \
         python-keystoneauth1 \
     && yum clean all
+
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        python-barbicanclient \
+        python-ceilometerclient \
+        python-designateclient \
+        python-heatclient \
+        python-ironicclient \
+        python-manilaclient \
+        python-PyMySQL \
+        python-pip \
+        python-saharaclient \
+        python-swiftclient \
+        python-troveclient \
+        python-openstackclient \
+        python-keystoneauth1 \
+    && zypper clean -a
 
     {% elif base_distro in ['ubuntu'] %}
 

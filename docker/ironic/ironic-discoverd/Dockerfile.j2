@@ -10,6 +10,11 @@ RUN pip install ironic-discoverd
 #    openstack-ironic-discoverd \
 #    && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
+    && /bin/false
+
     {% endif %}
 {% endif %}
 

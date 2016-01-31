@@ -17,6 +17,11 @@ RUN yum install -y \
     && rpm -e openstack-designate-api \
     && mv /tmp/policy.json /etc/designate/
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
+    && /bin/false
+
     {% endif %}
 {% elif install_type == 'source' %}
 

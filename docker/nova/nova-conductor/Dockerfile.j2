@@ -9,6 +9,11 @@ RUN yum -y install openstack-nova-conductor \
 
     {% elif base_distro in ['ubuntu'] %}
 
+RUN zypper -n install openstack-nova-conductor \
+    && zypper clean -a
+
+    {% elif base_distro in ['ubuntu'] %}
+
 RUN apt-get install -y --no-install-recommends \
         nova-conductor \
     && apt-get clean

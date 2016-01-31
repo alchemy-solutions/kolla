@@ -13,6 +13,14 @@ if [[ "${KOLLA_BASE_DISTRO}" =~ fedora|centos|oraclelinux|rhel ]]; then
     rm -rf /var/run/httpd/* /run/httpd/* /tmp/httpd*
 fi
 
+# FIXME: Loading modules for version and wsgi
+if [[ "${KOLLA_BASE_DISTRO}" =~ opensuse|sles ]]; then
+    cat >>/etc/apache2/loadmodule.conf <<EOD
+LoadModule version_module                 /usr/lib64/apache2-prefork/mod_version.so
+LoadModule wsgi_module                    /usr/lib64/apache2/mod_wsgi.so
+EOD
+fi
+
 # Bootstrap and exit if KOLLA_BOOTSTRAP variable is set. This catches all cases
 # of the KOLLA_BOOTSTRAP variable being set, including empty.
 if [[ "${!KOLLA_BOOTSTRAP[@]}" ]]; then

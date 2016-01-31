@@ -7,6 +7,14 @@ RUN yum install -y \
         openvswitch \
     && yum clean all
 
+{% elif base_distro in ['opensuse', 'sles'] %}
+
+# kmod-compat --force to override modprobe deletion
+RUN zypper -n install --force \
+        kmod-compat \
+        openvswitch \
+    && zypper clean -a
+
 {% elif base_distro in ['ubuntu', 'debian'] %}
 
 RUN apt-get install -y --no-install-recommends openvswitch-switch \

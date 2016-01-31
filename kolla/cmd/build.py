@@ -268,16 +268,13 @@ class WorkerThread(threading.Thread):
                           'w') as tar:
             tar.add(plugins_path, arcname='plugins')
 
-        # Pull the latest image for the base distro only
-        pull = True if image['parent'] is None else False
-
         image['logs'] = str()
         buildargs = self.update_buildargs()
         for response in self.dc.build(path=image['path'],
                                       tag=image['fullname'],
                                       nocache=self.nocache,
                                       rm=True,
-                                      pull=pull,
+                                      pull=False,
                                       forcerm=self.forcerm,
                                       buildargs=buildargs):
             stream = json.loads(response.decode('utf-8'))
@@ -323,7 +320,10 @@ class KollaWorker(object):
         self.rpm_setup = self.build_rpm_setup(rpm_setup_config)
 
         if self.install_type == 'binary':
-            self.install_metatype = 'rdo'
+            if self.base in ['opensuse', 'sles']:
+                self.install_metatype = 'obs'
+            else:
+                self.install_metatype = 'rdo'
         elif self.install_type == 'source':
             self.install_metatype = 'mixed'
         elif self.install_type == 'rdo':
@@ -332,6 +332,12 @@ class KollaWorker(object):
         elif self.install_type == 'rhos':
             self.install_type = 'binary'
             self.install_metatype = 'rhos'
+        elif self.install_type == 'obs':
+            self.install_type = 'binary'
+            self.install_metatype = 'obs'
+        elif self.install_type == 'soc':
+            self.install_type = 'binary'
+            self.install_metatype = 'soc'
         else:
             raise KollaUnknownBuildTypeException(
                 'Unknown install type'

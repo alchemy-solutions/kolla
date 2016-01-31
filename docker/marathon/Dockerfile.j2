@@ -7,6 +7,11 @@ RUN yum install -y \
         marathon \
     && yum clean all
 
+{% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
+    && /bin/false
+
 {% elif base_distro in ['ubuntu', 'debian'] %}
 
 COPY openjdk.list /etc/apt/sources.list.d/openjdk.list

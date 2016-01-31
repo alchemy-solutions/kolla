@@ -15,6 +15,20 @@ RUN yum -y install \
         bridge-utils \
     && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        iptables \
+        ebtables \
+        dnsmasq \
+        bridge-utils \
+        openstack-nova \
+        python-keystoneclient \
+        python-cinderclient \
+        python-oslo.policy \
+    && zypper clean -a \
+    && chown -R nova: /var/lib/nova/tmp
+
     {% elif base_distro in ['ubuntu'] %}
 
 RUN apt-get install -y --no-install-recommends \
@@ -33,9 +47,6 @@ RUN yum -y install bridge-utils \
     {% elif base_distro in ['ubuntu', 'debian'] %}
 
 RUN apt-get install -y --no-install-recommends \
-        iptables \
-        ebtables \
-        dnsmasq \
         bridge-utils \
         python-libvirt \
         openssh-client \

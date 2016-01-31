@@ -11,6 +11,15 @@ RUN yum -y install \
         ceph-common \
     && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        openstack-nova-compute \
+        openvswitch \
+        sysfsutils \
+        ceph-common \
+    && zypper clean -a
+
     {% elif base_distro in ['ubuntu'] %}
 
 # ironic as workaround https://bugs.launchpad.net/packstack/+bug/1430388

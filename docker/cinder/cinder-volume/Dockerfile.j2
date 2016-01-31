@@ -9,6 +9,12 @@ RUN yum install -y \
         scsi-target-utils \
     && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+    lio-utils \
+  && zypper clean -a
+
    {% elif base_distro in ['ubuntu'] %}
 
 RUN apt-get install -y --no-install-recommends \

@@ -6,6 +6,11 @@ MAINTAINER {{ maintainer }}
 RUN yum -y install rsyslog \
     && yum clean all
 
+{% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install rsyslog \
+    && zypper clean -a
+
 {% elif base_distro in ['ubuntu', 'debian'] %}
 
 RUN apt-get install -y --no-install-recommends rsyslog \

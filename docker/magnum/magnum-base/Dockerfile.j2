@@ -21,6 +21,11 @@ RUN curl -L https://copr.fedoraproject.org/coprs/sdake/openstack-magnum/repo/fed
 RUN echo '{{ install_type }} not yet available for {{ base_distro }}' \
     && /bin/false
 
+{% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
+    && /bin/false
+
     {% endif %}
 {% elif install_type == 'source' %}
 

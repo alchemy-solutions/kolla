@@ -13,6 +13,18 @@ RUN yum -y install \
         ceph-common \
     && yum clean all
 
+{% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        libvirt-daemon \
+        libguestfs0 \
+        qemu-x86 \
+        libvirt-daemon-driver-nwfilter \
+        libvirt-daemon-config-nwfilter \
+        libvirt-daemon-driver-lxc \
+        ceph-common \
+    && zypper clean -a
+
 {% elif base_distro in ['ubuntu', 'debian'] %}
 
 RUN apt-get install -y --no-install-recommends \

@@ -10,6 +10,16 @@ RUN yum -y install \
         hdparm \
     && yum clean all
 
+{% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        net-tools \
+        ceph \
+        ceph-radosgw \
+        parted \
+        hdparm \
+    && zypper clean -a
+
 {% elif base_distro in ['ubuntu', 'debian'] %}
 
 RUN apt-get install -y --no-install-recommends \

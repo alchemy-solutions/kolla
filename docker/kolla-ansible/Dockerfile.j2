@@ -18,6 +18,20 @@ RUN yum -y install \
         openssh-clients \
     && yum clean all
 
+{% elif base_distro in ['opensuse', 'sles'] %}
+
+        #MariaDB-shared \
+RUN zypper -n install \
+        gcc \
+        git-core \
+        libffi48-devel \
+        libxml2-devel \
+        libxslt-devel \
+        MariaDB-devel \
+        libopenssl-devel \
+        python-devel \
+    && zypper clean -a
+
 {% elif base_distro in ['ubuntu', 'debian'] %}
 
 RUN apt-get -y --no-install-recommends install \

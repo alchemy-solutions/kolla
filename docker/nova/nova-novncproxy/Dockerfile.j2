@@ -9,6 +9,13 @@ RUN yum -y install \
         openstack-nova-novncproxy \
     && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        novnc \
+        openstack-nova-novncproxy \
+    && zypper clean -a
+
     {% elif base_distro in ['ubuntu'] %}
 
 RUN apt-get install -y --no-install-recommends \

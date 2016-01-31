@@ -11,6 +11,13 @@ RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
     && /bin/false
 
     {% endif %}
+{% elif base_distro in ['opensuse', 'sles'] %}
+    {% if install_type not in ['source', 'binary', 'obs', 'soc'] %}
+
+RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
+    && /bin/false
+
+    {% endif %}
 {% elif base_distro in ['ubuntu', 'debian'] %}
     {% if install_type not in ['source','binary'] %}
 
@@ -163,6 +170,47 @@ RUN yum -y install \
     {% endif %}
     {# endif for install type is source for RPM based distros #}
 {# endif for base_distro centos,fedora,oraclelinux,rhel #}
+{% elif base_distro in ['opensuse', 'sles'] %}
+
+    {% if install_type == 'binary' %}
+
+RUN echo 'gpgcheck = false' >>/etc/zypp/zypp.conf
+
+    {% if base_distro == 'opensuse' %}
+ENV KOLLA_OBS_DISTRO openSUSE_Leap_42.1
+    {% elif base_distro == 'sles' %}
+ENV KOLLA_OBS_DISTRO SLE_12_SP1
+    {% endif %}
+
+RUN zypper addrepo obs://Cloud:OpenStack:Liberty/$KOLLA_OBS_DISTRO OpenStack-Liberty \
+    && zypper --gpg-auto-import-keys ref -s \
+    && zypper clean -a
+
+    {% if base_distro == 'sles' %}
+
+RUN zypper addrepo obs://network/SLE_12 Network \
+    && zypper addrepo http://yum.mariadb.org/10.0/sles12-amd64 MariaDB \
+    && zypper --gpg-auto-import-keys ref -s \
+    && zypper clean -a
+
+    {% endif %}
+
+# Install base packages
+RUN zypper -n install \
+        curl \
+        sudo \
+        which \
+        glibc-locale \
+        python \
+        python-pip \
+        python-jinja2 \
+        python-kazoo \
+        python-six \
+    && zypper clean -a
+
+    {% endif %}
+    {# Endif for install_type binary #}
+
 {% elif base_distro in ['ubuntu', 'debian'] %}
 
 # This will prevent questions from being asked during the install

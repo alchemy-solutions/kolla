@@ -21,7 +21,7 @@ from kolla import version
 RDO_MIRROR = "http://trunk.rdoproject.org/centos7"
 DELOREAN = "{}/current-passed-ci/delorean.repo".format(RDO_MIRROR)
 DELOREAN_DEPS = "{}/delorean-deps.repo".format(RDO_MIRROR)
-INSTALL_TYPE_CHOICES = ['binary', 'source', 'rdo', 'rhos']
+INSTALL_TYPE_CHOICES = ['binary', 'source', 'rdo', 'rhos', 'obs', 'soc']
 
 _PROFILE_OPTS = [
     cfg.ListOpt('infra',

@@ -10,6 +10,17 @@ RUN yum -y install \
     && rm -rf /var/lib/rabbitmq/* \
     && curl -o /usr/lib/rabbitmq/lib/rabbitmq_server-3.5.5/plugins/rabbitmq_clusterer-3.5.x-189b3a81.ez http://www.rabbitmq.com/community-plugins/v3.5.x/rabbitmq_clusterer-3.5.x-189b3a81.ez
 
+{% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install --from OpenStack-Liberty \
+        net-tools \
+        rabbitmq-server \
+        rabbitmq-server-plugins \
+    && zypper clean -a \
+    && rm -rf /var/lib/rabbitmq/* \
+    && ln -s /usr/lib64/rabbitmq /usr/lib/ \
+    && curl -o /usr/lib64/rabbitmq/lib/rabbitmq_server-3.5.3/plugins/rabbitmq_clusterer-3.5.x-189b3a81.ez http://www.rabbitmq.com/community-plugins/v3.5.x/rabbitmq_clusterer-3.5.x-189b3a81.ez
+
 {% elif base_distro in ['ubuntu', 'debian'] %}
 
 RUN apt-get install -y --no-install-recommends rabbitmq-server \

@@ -9,6 +9,11 @@ RUN yum install -y python-keystone \
 
     {% elif base_distro in ['ubuntu'] %}
 
+RUN zypper -n install python-keystone \
+  && zypper clean -a
+
+    {% elif base_distro in ['ubuntu'] %}
+
 RUN apt-get install -y --no-install-recommends \
         cinder-api \
     && apt-get clean

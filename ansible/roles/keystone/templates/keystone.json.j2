@@ -1,5 +1,13 @@
-{% set keystone_cmd = 'apache2' if kolla_base_distro in ['ubuntu', 'debian'] else 'httpd' %}
-{% set keystone_dir = 'apache2/conf-enabled' if kolla_base_distro in ['ubuntu', 'debian'] else 'httpd/conf.d' %}
+{% if kolla_base_distro in ['opensuse', 'sles'] %}
+{% set keystone_cmd = 'httpd' %}
+{% set keystone_dir = 'apache2/conf.d' %}
+{% elif kolla_base_distro in ['ubuntu', 'debian'] %}
+{% set keystone_cmd = 'apache2' %}
+{% set keystone_dir = 'apache2/conf-enabled' %}
+{% else %}
+{% set keystone_cmd = 'httpd' %}
+{% set keystone_dir = 'httpd/conf.d' %}
+{% endif %}
 {
     "command": "/usr/sbin/{{ keystone_cmd }}",
     "config_files": [

@@ -13,6 +13,17 @@ RUN yum -y install openstack-cinder \
   && yum clean all \
   && mkdir -p /etc/ceph
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+    openstack-cinder \
+    python-automaton \
+    lvm2 \
+    ceph-common \
+    python-oslo.policy \
+  && zypper clean -a \
+  && mkdir -p /etc/ceph
+
     {% elif base_distro in ['ubuntu'] %}
 
 RUN apt-get install -y --no-install-recommends \

@@ -10,6 +10,12 @@ RUN yum install -y \
         openstack-neutron-linuxbridge \
     && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        openstack-neutron-linuxbridge-agent \
+    && zypper clean -a
+
     {% elif base_distro in ['ubuntu'] %}
 
 RUN apt-get install -y --no-install-recommends \

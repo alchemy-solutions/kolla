@@ -6,6 +6,11 @@ MAINTAINER {{ maintainer }}
 RUN yum -y install haproxy \
     && yum clean all
 
+{% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install haproxy \
+    && zypper clean -a
+
 {% elif base_distro == 'ubuntu' %}
 
 RUN apt-get install -y --no-install-recommends -t trusty-backports haproxy \
