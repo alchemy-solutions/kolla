@@ -39,4 +39,7 @@ echo "Stopping containers..."
 echo "Removing containers..."
 (docker rm -v -f ${containers_to_kill[@]} 2>&1) > /dev/null
 
+echo "Refresh containers..."
+#(docker rm -v -f ${containers_to_kill[@]} 2>&1) > /dev/null
+
 echo "All cleaned up!"

@@ -15,8 +15,7 @@ RUN yum -y install openstack-cinder \
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
-RUN zypper -n install \
-    openstack-cinder \
+RUN zypper -n install openstack-cinder \
     python-automaton \
     lvm2 \
     ceph-common \

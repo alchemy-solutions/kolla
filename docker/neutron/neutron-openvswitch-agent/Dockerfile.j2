@@ -13,6 +13,7 @@ RUN yum install -y \
     {% elif base_distro in ['opensuse', 'sles'] %}
 
 RUN zypper -n install \
+        openvswitch-switch \
         openstack-neutron-openvswitch-agent \
     && zypper clean -a
 

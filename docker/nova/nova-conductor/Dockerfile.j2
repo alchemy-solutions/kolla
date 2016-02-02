@@ -7,7 +7,7 @@ MAINTAINER {{ maintainer }}
 RUN yum -y install openstack-nova-conductor \
     && yum clean all
 
-    {% elif base_distro in ['ubuntu'] %}
+    {% elif base_distro in ['opensuse', 'sles'] %}
 
 RUN zypper -n install openstack-nova-conductor \
     && zypper clean -a

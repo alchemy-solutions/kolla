@@ -7,9 +7,10 @@ MAINTAINER {{ maintainer }}
 RUN yum install -y python-keystone \
   && yum clean all
 
-    {% elif base_distro in ['ubuntu'] %}
+    {% elif base_distro in ['opensuse', 'sles'] %}
 
 RUN zypper -n install python-keystone \
+        openstack-cinder-api \
   && zypper clean -a
 
     {% elif base_distro in ['ubuntu'] %}

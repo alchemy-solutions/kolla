@@ -13,6 +13,7 @@ RUN yum install -y \
     {% elif base_distro in ['opensuse', 'sles'] %}
 
 RUN zypper -n install \
+        ebtables \
         openstack-neutron-linuxbridge-agent \
     && zypper clean -a
 

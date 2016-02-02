@@ -8,6 +8,7 @@ RUN yum -y install \
         iproute \
         mariadb-libs \
         openssl \
+        patch \
     && yum clean all
 
 {% elif base_distro in ['opensuse', 'sles'] %}
@@ -16,10 +17,14 @@ RUN zypper -n install \
         git-core \
         iproute2 \
         openssl \
+        patch \
     && zypper clean -a
 
 {% endif %}
 {% if install_type == 'binary' %}
+
+COPY oslo-log.patch /var/lib/kolla/oslo-log.patch
+
     {% if base_distro in ['fedora', 'centos', 'oraclelinux', 'rhel'] %}
 
 RUN yum -y install \
@@ -42,7 +47,9 @@ RUN yum -y install \
         python-zaqarclient \
         python-openstackclient \
         python-keystoneauth1 \
-    && yum clean all
+        python-oslo-log \
+    && yum clean all \
+    && patch -d /usr/lib/python2.7/site-packages/oslo_log -p1 < /var/lib/kolla/oslo-log.patch
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
@@ -60,7 +67,9 @@ RUN zypper -n install \
         python-troveclient \
         python-openstackclient \
         python-keystoneauth1 \
-    && zypper clean -a
+        python-oslo.log \
+    && zypper clean -a \
+    && patch -d /usr/lib/python2.7/site-packages/oslo_log -p1 < /var/lib/kolla/oslo-log.patch
 
     {% elif base_distro in ['ubuntu'] %}
 

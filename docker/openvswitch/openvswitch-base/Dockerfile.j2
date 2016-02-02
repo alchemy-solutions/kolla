@@ -13,7 +13,11 @@ RUN yum install -y \
 RUN zypper -n install --force \
         kmod-compat \
         openvswitch \
+        openvswitch-switch \
     && zypper clean -a
+
+RUN mkdir -p /etc/openvswitch \
+    && ln -s /run/openvswitch /var/run/
 
 {% elif base_distro in ['ubuntu', 'debian'] %}
 

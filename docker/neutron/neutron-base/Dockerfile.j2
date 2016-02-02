@@ -16,8 +16,12 @@ RUN yum -y install \
 
 RUN zypper -n install \
         openstack-neutron \
+        openstack-neutron-server \
         openvswitch \
-    && zypper clean -a
+        openvswitch-switch \
+        python-oslo.reports \
+    && zypper clean -a \
+    && ln -s /run/openvswitch /var/run/
 
     {% elif base_distro in ['ubuntu'] %}
 

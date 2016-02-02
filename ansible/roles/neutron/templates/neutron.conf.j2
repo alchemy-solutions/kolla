@@ -1,3 +1,4 @@
+{% set config_dir = '/srv/shared' if kolla_base_distro in ['fedora', 'centos', 'oraclelinux', 'rhel'] else '/etc' %}
 # neutron.conf
 [DEFAULT]
 debug = {{ neutron_logging_debug }}
@@ -9,7 +10,7 @@ bind_host = {{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4'][
 bind_port = {{ neutron_server_port }}
 
 #lock_path = /var/lock/neutron
-api_paste_config = /usr/share/neutron/api-paste.ini
+api_paste_config = {{ config_dir }}/neutron/api-paste.ini
 
 
 {% if neutron_plugin_agent == "openvswitch" %}

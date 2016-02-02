@@ -12,6 +12,7 @@ RUN yum install -y \
     {% elif base_distro in ['opensuse', 'sles'] %}
 
 RUN zypper -n install \
+    openstack-cinder-volume \
     lio-utils \
   && zypper clean -a
 

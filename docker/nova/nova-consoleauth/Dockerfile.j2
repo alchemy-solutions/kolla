@@ -10,6 +10,7 @@ RUN yum -y install openstack-nova-console \
     {% elif base_distro in ['opensuse', 'sles'] %}
 
 RUN zypper -n install openstack-nova-console \
+        openstack-nova-consoleauth \
     && zypper clean -a
 
     {% elif base_distro in ['ubuntu'] %}
