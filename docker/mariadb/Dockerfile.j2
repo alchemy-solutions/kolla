@@ -18,6 +18,7 @@ RUN yum install -y \
 
 {% elif base_distro in ['opensuse', 'sles'] %}
 
+# FIXME: create a stable repo for MariaDB and Percona XtraBackup
 RUN zypper -n install --from MariaDB \
         MariaDB-Galera-server \
         MariaDB-client \
@@ -28,8 +29,10 @@ RUN zypper -n install --from MariaDB \
         tar \
         expect \
     && rm -rf /var/lib/mysql/* \
-    && rpm -i http://download.opensuse.org/repositories/KDE:/Current/SLE_12/x86_64/libgcrypt11-1.5.4-2.14.1.x86_64.rpm \
-    && curl https://www.percona.com/downloads/XtraBackup/Percona-XtraBackup-2.3.3/binary/tarball/percona-xtrabackup-2.3.3-Linux-x86_64.tar.gz | tar -xz --strip-components=1 -C /usr percona-xtrabackup-2.3.3-Linux-x86_64/bin
+    && zypper clean -a
+
+RUN rpm -i http://software.alchemy.solutions/repo/SUSE/Products/Cloud/6/x86_64/libgcrypt11-1.5.4-2.14.1.x86_64.rpm \
+    && curl http://software.alchemy.solutions/repo/SUSE/Products/Cloud/6/x86_64/percona-xtrabackup-2.3.3-Linux-x86_64.tar.gz | tar -xz --strip-components=1 -C /usr percona-xtrabackup-2.3.3-Linux-x86_64/bin
 
 {% elif base_distro in ['ubuntu', 'debian'] %}
 

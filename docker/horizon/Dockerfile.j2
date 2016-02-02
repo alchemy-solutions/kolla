@@ -29,6 +29,14 @@ RUN zypper -n install \
         apache2-mod_wsgi \
     && zypper clean -a
 
+    {% if base_distro == 'sles' %}
+
+RUN zypper -n install \
+        openstack-dashboard-theme-SUSE \
+    && zypper clean -a
+
+    {% endif %}
+
 RUN useradd --user-group horizon \
     && sed -i -r 's,^(Listen 80),#\1,' /etc/apache2/listen.conf \
     && cp /etc/apache2/conf.d/openstack-dashboard.conf.sample /etc/apache2/vhosts.d/openstack-dashboard.conf \
