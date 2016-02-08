@@ -71,6 +71,8 @@ RUN zypper -n install \
     && zypper clean -a \
     && patch -d /usr/lib/python2.7/site-packages/oslo_log -p1 < /var/lib/kolla/oslo-log.patch
 
+#RUN sed -i '/pam_systemd/d' /etc/pam.d/common-session
+
     {% elif base_distro in ['ubuntu'] %}
 
 # This will prevent questions from being asked during the install

@@ -37,7 +37,7 @@ RUN zypper -n install \
 
     {% endif %}
 
-RUN useradd --user-group horizon \
+RUN useradd -m --user-group horizon \
     && sed -i -r 's,^(Listen 80),#\1,' /etc/apache2/listen.conf \
     && cp /etc/apache2/conf.d/openstack-dashboard.conf.sample /etc/apache2/vhosts.d/openstack-dashboard.conf \
     && chown -R horizon: /srv/www/openstack-dashboard \

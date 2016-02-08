@@ -126,14 +126,15 @@ password = {{ neutron_keystone_password }}
 connection = mysql+pymysql://{{ nova_database_user }}:{{ nova_database_password }}@{{ nova_database_address }}/{{ nova_database_name }}
 
 [keystone_authtoken]
-auth_uri = http://{{ kolla_internal_address }}:{{ keystone_public_port }}
-auth_url = http://{{ kolla_internal_address }}:{{ keystone_admin_port }}
+auth_uri = http://{{ kolla_internal_address }}:{{ keystone_public_port }}/v3
+identity_uri = http://{{ kolla_internal_address }}:{{ keystone_admin_port }}
+auth_version = v3
 auth_type = password
 project_domain_id = default
 user_domain_id = default
-project_name = service
-username = nova
-password = {{ nova_keystone_password }}
+admin_tenant_name = service
+admin_user = nova
+admin_password = {{ nova_keystone_password }}
 
 [libvirt]
 connection_uri = "qemu+tcp://{{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}/system"

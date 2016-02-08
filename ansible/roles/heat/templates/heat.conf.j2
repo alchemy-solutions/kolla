@@ -37,14 +37,15 @@ bind_port = {{ heat_api_cfn_port }}
 connection = mysql+pymysql://{{ heat_database_user }}:{{ heat_database_password }}@{{ heat_database_address }}/{{ heat_database_name }}
 
 [keystone_authtoken]
-auth_uri = http://{{ kolla_internal_address }}:{{ keystone_public_port }}
-auth_url = http://{{ kolla_internal_address }}:{{ keystone_admin_port }}
+auth_uri = http://{{ kolla_internal_address }}:{{ keystone_public_port }}/v3
+identity_uri = http://{{ kolla_internal_address }}:{{ keystone_admin_port }}
+auth_version = v3
 auth_type = password
 project_domain_id = default
 user_domain_id = default
-project_name = service
-username = heat
-password = {{ heat_keystone_password }}
+admin_tenant_name = service
+admin_user = heat
+admin_password = {{ heat_keystone_password }}
 
 [ec2authtoken]
 auth_uri = http://{{ kolla_internal_address }}:{{ keystone_public_port }}

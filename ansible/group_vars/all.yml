@@ -155,6 +155,13 @@ openstack_auth_v2:
     password: "{{ keystone_admin_password }}"
     project_name: "admin"
 
+openstack_auth_v3:
+    identity_uri: "http://{{ kolla_internal_address }}:{{ keystone_admin_port }}/v3"
+    auth_version: "v3"
+    admin_user: "admin"
+    admin_password: "{{ keystone_admin_password }}"
+    admin_tenant_name: "admin"
+
 # These roles are required for Kolla to be operation, however a savvy deployer
 # could disable some of these required roles and run their own services.
 enable_glance: "yes"
