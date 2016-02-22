@@ -9,8 +9,8 @@ RUN yum -y install openstack-heat-api-cfn \
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
-RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
-    && /bin/false
+RUN zypper -n install openstack-heat-api-cfn \
+    && zypper clean -a
 
     {% elif base_distro in ['ubuntu'] %}
 

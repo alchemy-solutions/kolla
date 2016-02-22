@@ -8,8 +8,8 @@ RUN yum install -y rsync \
 
 {% elif base_distro in ['opensuse', 'sles'] %}
 
-RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
-    && /bin/false
+RUN zypper -n install rsync \
+    && zypper clean -a
 
 {% elif base_distro in ['ubuntu', 'debian'] %}
 

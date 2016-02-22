@@ -10,8 +10,9 @@ RUN yum -y install \
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
-RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
-    && /bin/false
+RUN zypper -n install \
+        openstack-ceilometer \
+    && zypper clean -a
 
     {% endif %}
 
