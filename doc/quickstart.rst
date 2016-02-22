@@ -29,6 +29,8 @@ The recommended deployment target requirements:
 - More than 8gb main memory.
 - At least 40gb disk space.
 
+.. NOTE:: Some commands below may require root permissions (e.g. pip, apt-get).
+
 Installing Dependencies
 -----------------------
 
@@ -49,7 +51,7 @@ and OverlayFS. In order to update kernel in Ubuntu 14.04 LTS to 4.2, run:
 
 ::
 
-    sudo apt-get install linux-image-generic-lts-wily
+    apt-get install linux-image-generic-lts-wily
 
 .. NOTE:: Install is *very* sensitive about version of components.  Please
   review carefully because default Operating System repos are likely out of
@@ -59,7 +61,7 @@ and OverlayFS. In order to update kernel in Ubuntu 14.04 LTS to 4.2, run:
 Component               Min Version  Max Version  Comment
 =====================   ===========  ===========  =========================
 Ansible                 1.9.4        < 2.0.0      On deployment host
-Docker                  1.9.0        none         On target nodes
+Docker                  1.10.0       none         On target nodes
 Docker Python           1.6.0        none         On target nodes
 Python Jinja2           2.6.0        none         On deployment host
 =====================   ===========  ===========  =========================
@@ -72,7 +74,7 @@ Make sure "pip" package manager is installed before procceed:
     easy_install pip
 
     # Ubuntu 14.04 LTS
-    sudo apt-get install python-pip
+    apt-get install python-pip
 
 To install Kolla tools and Python dependencies use:
 
@@ -116,7 +118,30 @@ is 1.8.3 or later and you are running Liberty, downgrade using these commands:
     systemctl restart docker.service
 
     # Ubuntu 14.04 LTS
-    sudo apt-get install docker-engine=1.8.2-0~trusty
+    apt-get install docker-engine=1.8.2-0~trusty
+
+When running with systemd you must setup docker-engine with the appropriate
+information in the Docker daemon to launch with. This means setting up the
+following information in the docker.service file. If you do not set the
+MountFlags option correctly then Kolla-Ansible will fail to deploy on
+neutron-dhcp-agent container. After changing the service file you must reload
+and restart the docker service:
+
+::
+
+    # /lib/systemd/system/docker.service
+    [Service]
+    MountFlags=shared
+
+    # Run these commands to reload the daemon
+    systemctl daemon-reload
+    systemctl restart docker
+
+For Ubuntu 14.04 which uses upstart instead of systemd, run the following:
+
+::
+
+    mount --make-shared /run
 
 On the system where the OpenStack CLI/Python code is run, the Kolla community
 recommends installing the OpenStack python clients if they are not installed.
@@ -127,7 +152,7 @@ following requirements are needed to build the client code:
 ::
 
    # Ubuntu
-   sudo apt-get install -y python-dev libffi-dev libssl-dev gcc
+   apt-get install -y python-dev libffi-dev libssl-dev gcc
 
    # Centos 7
    yum install -y python-devel libffi-devel openssl-devel gcc
@@ -181,25 +206,18 @@ Kolla deploys OpenStack using
 `Ansible <http://www.ansible.com>`__. Install Ansible from distribution
 packaging if the distro packaging has recommended version available.
 
-Currently all implemented distro versions of Ansible are too old to use distro
-packaging.  Once distro packaging is updated install from packaging using:
+Some implemented distro versions of Ansible are too old to use distro
+packaging.  Currently, CentOS and RHEL package Ansible 1.9.4 which is 
+suitable for use with Kolla. 
+
+On CentOS or RHEL systems, this can be done using:
 
 ::
 
     yum -y install ansible
 
-On DEB based systems this can be done using:
-
-::
-
-    apt-get install ansible
-
-If the distro packaged version of Ansible is too old, install Ansible using
-pip:
-
-::
-
-    pip install -U ansible
+Many DEB based systems do not meet Kolla's Ansible version requirements.
+It is recommended to use pip to install Ansible 1.9.4.
 
 Some ansible dependencies, like pycrypto, may need gcc installed on the build
 system. Install it using system packaging tools if it's not installed already:
@@ -210,7 +228,21 @@ system. Install it using system packaging tools if it's not installed already:
     yum -y install gcc
 
     # Ubuntu
-    sudo apt-get install gcc
+    apt-get install gcc
+
+Finally Ansible 1.9.4 may be installed using:
+
+::
+
+    pip install -U ansible==1.9.4
+
+If DEB based systems include a version of Ansible that meets Kolla's
+version requirements it can be installed by:
+
+::
+
+    apt-get install ansible
+
 
 Deploy a registry (required for multinode)
 ------------------------------------------
@@ -220,42 +252,23 @@ to pull from the Docker Hub to get images. Kolla can function with
 or without a local registry, however for a multinode deployment a registry
 is required.
 
-Currently, the Docker registry v2 has extremely bad performance
+The Docker registry prior to version 2.3 has extremely bad performance
 because all container data is pushed for every image rather than taking
 advantage of Docker layering to optimize push operations.  For more
 information reference
 `pokey registry <https://github.com/docker/docker/issues/14018>`__.
 
-There are two ways to set up a local docker registry.  Either use packages
-or pull the registry container from the Docker Hub.  The packaged Docker
-registry is v1 and the container is v2.  For CentOS, the Docker registry v1
-is a good alternative while Docker works to solve the v2 github issue
-mentioned above.  Unfortunately, not all distributions package
-docker-registry.  Note that the v1 registry can be run from Docker containers
-by using the registry:latest tag.  However, the current latest tag is broken
-and crashes on startup.  Therefore, on Centos use the follow operations
-to start the docker-registry v1:
-
-::
-
-    # CentOS
-
-    yum install docker-registry
-    sed -i "s/REGISTRY_PORT=5000/REGISTRY_PORT=4000/g" /etc/sysconfig/docker-registry
-    systemctl daemon-reload
-    systemctl enable docker-registry
-    systemctl start docker-registry
-
-If not using CentOS or Docker registry version 2 is desired, run the following
-command:
+The Kolla community recommends using registry 2.3 or later. To deploy
+registry 2.3 do the following: 
 
 ::
 
     docker run -d -p 4000:5000 --restart=always --name registry registry:2
 
-Note: Kolla looks for the Docker registry to use port 4000. (Docker default is port 5000)
+Note: Kolla looks for the Docker registry to use port 4000. (Docker default
+is port 5000)
 
-After enabling the registry, it is necessary to instruct docker that it will
+After enabling the registry, it is necessary to instruct Docker that it will
 be communicating with an insecure registry.  To enable insecure registry
 communication on CentOS, modify the "/etc/sysconfig/docker" file to contain
 the following where 192.168.1.100 is the IP address of the machine where the

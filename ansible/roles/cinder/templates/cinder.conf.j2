@@ -1,13 +1,16 @@
 [DEFAULT]
 debug = {{ cinder_logging_debug }}
 
-use_syslog = True
-syslog_log_facility = LOG_LOCAL0
+log_dir = /var/log/kolla/cinder
+
+# Set use_stderr to False or the logs will also be sent to stderr
+# and collected by Docker
+use_stderr = False
 
 enable_v1_api=false
 volume_name_template = %s
 
-glance_api_servers = http://{{ kolla_internal_address }}:{{ glance_api_port }}
+glance_api_servers = {{ internal_protocol }}://{{ kolla_internal_address }}:{{ glance_api_port }}
 glance_api_version = 2
 
 os_region_name = {{ openstack_region_name }}
@@ -43,15 +46,14 @@ auth_strategy = keystone
 connection = mysql+pymysql://{{ cinder_database_user }}:{{ cinder_database_password }}@{{ cinder_database_address }}/{{ cinder_database_name }}
 
 [keystone_authtoken]
-auth_uri = http://{{ kolla_internal_address }}:{{ keystone_public_port }}/v3
-identity_uri = http://{{ kolla_internal_address }}:{{ keystone_admin_port }}
-auth_version = v3
+auth_uri = {{ internal_protocol }}://{{ kolla_internal_address }}:{{ keystone_public_port }}
+auth_url = {{ admin_protocol }}://{{ kolla_internal_address }}:{{ keystone_admin_port }}
 auth_type = password
 project_domain_id = default
 user_domain_id = default
-admin_tenant_name = service
-admin_user = {{ cinder_keystone_user }}
-admin_password = {{ cinder_keystone_password }}
+project_name = service
+username = {{ cinder_keystone_user }}
+password = {{ cinder_keystone_password }}
 
 [oslo_concurrency]
 lock_path = /var/lib/cinder/tmp

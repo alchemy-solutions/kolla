@@ -1,6 +1,6 @@
 ---
 - name: Creating the admin project, user and role
-  command: docker exec -t kolla_ansible /usr/bin/ansible localhost
+  command: docker exec -t kolla_toolbox /usr/bin/ansible localhost
     -m kolla_keystone_user
     -a "project=admin
         user=admin
@@ -18,15 +18,15 @@
   run_once: True
 
 - name: Creating the Keystone service and endpoint
-  command: docker exec -t kolla_ansible /usr/bin/ansible localhost
+  command: docker exec -t kolla_toolbox /usr/bin/ansible localhost
     -m kolla_keystone_service
     -a "service_name=keystone
         service_type=identity
         description='Openstack Identity'
         endpoint_region={{ openstack_region_name }}
-        admin_url='http://{{ kolla_internal_address }}:{{ keystone_admin_port }}'
-        internal_url='http://{{ kolla_internal_address }}:{{ keystone_admin_port }}'
-        public_url='http://{{ kolla_external_address }}:{{ keystone_public_port }}'
+        admin_url='{{ admin_protocol }}://{{ kolla_internal_address }}:{{ keystone_admin_port }}'
+        internal_url='{{ internal_protocol }}://{{ kolla_internal_address }}:{{ keystone_admin_port }}'
+        public_url='{{ public_protocol }}://{{ kolla_external_address }}:{{ keystone_public_port }}'
         region_name={{ openstack_region_name }}
         auth_type=admin_token
         auth={{ '{{ openstack_keystone_token_auth }}' }}"

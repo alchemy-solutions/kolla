@@ -25,7 +25,7 @@ kolla_install_type: "binary"
 # Value set in the public_url endpoint in Keystone
 kolla_external_address: "{{ kolla_internal_address }}"
 
-kolla_enable_sanity_checks: no
+kolla_enable_sanity_checks: "no"
 
 kolla_enable_sanity_keystone: "{{ kolla_enable_sanity_checks }}"
 kolla_enable_sanity_glance: "{{ kolla_enable_sanity_checks }}"
@@ -84,6 +84,9 @@ rabbitmq_management_port: "15672"
 rabbitmq_cluster_port: "25672"
 rabbitmq_epmd_port: "4369"
 
+mongodb_port: "27017"
+mongodb_web_port: "28017"
+
 haproxy_stats_port: "1984"
 
 keystone_public_port: "5000"
@@ -123,10 +126,15 @@ rgw_port: "6780"
 mistral_api_port: "8989"
 
 kibana_port: "5601"
+
 elasticsearch_port: "9200"
 
+public_protocol: "http"
+internal_protocol: "http"
+admin_protocol: "http"
+
 ####################
-# Openstack options
+# OpenStack options
 ####################
 openstack_release: "2.0.0"
 openstack_logging_debug: "False"
@@ -139,10 +147,10 @@ set_sysctl: "yes"
 # Valid options are [ novnc, spice ]
 nova_console: "novnc"
 
-# Openstack authentication string. You should only need to override these if you
+# OpenStack authentication string. You should only need to override these if you
 # are changing the admin tenant/project or user.
 openstack_auth:
-    auth_url: "http://{{ kolla_internal_address }}:{{ keystone_admin_port }}"
+    auth_url: "{{ admin_protocol }}://{{ kolla_internal_address }}:{{ keystone_admin_port }}"
     username: "admin"
     password: "{{ keystone_admin_password }}"
     project_name: "admin"
@@ -150,17 +158,10 @@ openstack_auth:
 # This shouldn't be needed for long. It is only temporary until we get the
 # ansible modules sorted out
 openstack_auth_v2:
-    auth_url: "http://{{ kolla_internal_address }}:{{ keystone_admin_port }}/v2.0"
+    auth_url: "{{ admin_protocol }}://{{ kolla_internal_address }}:{{ keystone_admin_port }}/v2.0"
     username: "admin"
     password: "{{ keystone_admin_password }}"
     project_name: "admin"
-
-openstack_auth_v3:
-    identity_uri: "http://{{ kolla_internal_address }}:{{ keystone_admin_port }}/v3"
-    auth_version: "v3"
-    admin_user: "admin"
-    admin_password: "{{ keystone_admin_password }}"
-    admin_tenant_name: "admin"
 
 # These roles are required for Kolla to be operation, however a savvy deployer
 # could disable some of these required roles and run their own services.
@@ -185,6 +186,8 @@ enable_ironic: "no"
 enable_magnum: "no"
 enable_mistral: "no"
 enable_elk: "no"
+enable_mongodb: "no"
+
 ironic_keystone_user: "ironic"
 
 # Nova fake driver and the number of fake driver per compute node

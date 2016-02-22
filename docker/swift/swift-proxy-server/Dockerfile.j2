@@ -7,15 +7,7 @@ MAINTAINER {{ maintainer }}
 RUN yum -y install openstack-swift-proxy \
     && yum clean all
 
-    {% elif base_distro in ['opensuse', 'sles'] %}
-
-RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
-    && /bin/false
-
     {% endif %}
 {% endif %}
-
-COPY extend_start.sh /usr/local/bin/kolla_extend_start
-RUN chmod 755 /usr/local/bin/kolla_extend_start
 
 {{ include_footer }}

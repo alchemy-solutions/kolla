@@ -3,11 +3,13 @@
 bind-address={{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}
 port={{ mariadb_port }}
 
+log-error=/var/log/kolla/mariadb/mariadb.log
+
 binlog_format=ROW
 default-storage-engine=innodb
 innodb_autoinc_lock_mode=2
 
-datadir=/var/lib/mysql
+datadir=/var/lib/mysql/
 
 wsrep_cluster_address=gcomm://{% if (groups['mariadb'] | length) > 1 %}{% for host in groups['mariadb'] %}{{ hostvars[host]['ansible_' + hostvars[host]['api_interface']]['ipv4']['address'] }}:{{ mariadb_wsrep_port }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}
 
@@ -26,4 +28,4 @@ wsrep_slave_threads=4
 max_connections=1000
 
 [server]
-pid-file=/var/lib/mysql/{{ ansible_hostname }}-galera.pid
+pid-file=/var/lib/mysql/mariadb.pid

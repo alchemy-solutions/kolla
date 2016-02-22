@@ -6,6 +6,7 @@
     recurse: yes
   with_items:
     - "rsyslog"
+    - "heka"
 
 - name: Copying over config.json files for services
   template:
@@ -13,6 +14,7 @@
     dest: "{{ node_config_directory }}/{{ item }}/config.json"
   with_items:
     - "rsyslog"
+    - "heka"
 
 - name: Copying over rsyslog.conf
   template:
@@ -20,3 +22,36 @@
     dest: "{{ node_config_directory }}/{{ item }}/{{ item }}.conf"
   with_items:
     - "rsyslog"
+
+- name: Copying over heka config files
+  template:
+    src: "heka-{{ item }}.toml.j2"
+    dest: "{{ node_config_directory }}/heka/heka-{{ item }}.toml"
+  with_items:
+    - "global"
+    - "haproxy"
+    - "rabbitmq"
+    - "openstack"
+    - "mariadb"
+    - "keystone"
+
+- name: Copying over heka swift config files
+  template:
+    src: "heka-swift.toml.j2"
+    dest: "{{ node_config_directory }}/heka/heka-{{ item }}.toml"
+  with_items:
+    - "swift-account-auditor"
+    - "swift-account-reaper"
+    - "swift-account-replicator"
+    - "swift-account-server"
+    - "swift-container-auditor"
+    - "swift-container-replicator"
+    - "swift-container-server"
+    - "swift-container-updater"
+    - "swift-object-auditor"
+    - "swift-object-expirer"
+    - "swift-object-replicator"
+    - "swift-object-server"
+    - "swift-object-updater"
+    - "swift-proxy-server"
+    - "swift-rsyncd"

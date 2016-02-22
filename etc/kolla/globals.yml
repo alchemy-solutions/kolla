@@ -20,7 +20,7 @@
 # 'network_interface' as set in the Networking section below.
 kolla_internal_address: "10.10.10.254"
 
-# The Public address used to communicate with Openstack as set in the public_url
+# The Public address used to communicate with OpenStack as set in the public_url
 # for the endpoints that will be created. It defaults to kolla_internal_address
 # but can be overridden in your globals.yml to a public address. It is up to the
 # deployer to ensure that that public address maps to the environment correctly.
@@ -66,9 +66,6 @@ neutron_external_interface: "eth1"
 ####################
 # OpenStack options
 ####################
-# This option is used to specify the tag to use when pulling the Docker images
-#openstack_release: "1.0.0"
-
 # Use these options to set the various log levels across all OpenStack projects
 #openstack_logging_debug: "False"
 
@@ -88,7 +85,7 @@ neutron_external_interface: "eth1"
 # must provide separate disks than those for the OSDs
 # ceph_use_cache: "no"
 # Valid options are [ forward, none, writeback ]
-# ceph_cache_mode: writeback
+# ceph_cache_mode: "writeback"
 
 # A requirement for using the erasure-coded pools is you must setup a cache tier
 # Valid options are [ erasure, replicated ]

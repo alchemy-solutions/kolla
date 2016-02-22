@@ -1,14 +1,14 @@
 ---
 - name: Creating the Ironic service and endpoint
-  command: docker exec -t kolla_ansible /usr/bin/ansible localhost
+  command: docker exec -t kolla_toolbox /usr/bin/ansible localhost
     -m kolla_keystone_service
     -a "service_name=ironic
         service_type=baremetal
         description='Ironic bare metal provisioning service'
         endpoint_region={{ openstack_region_name }}
-        admin_url='http://{{ ironic_admin_address }}:{{ ironic_api_port }}'
-        internal_url='http://{{ ironic_internal_address }}:{{ ironic_api_port }}'
-        public_url='http://{{ ironic_public_address }}:{{ ironic_api_port }}'
+        admin_url='{{ admin_protocol }}://{{ ironic_admin_address }}:{{ ironic_api_port }}'
+        internal_url='{{ internal_protocol }}://{{ ironic_internal_address }}:{{ ironic_api_port }}'
+        public_url='{{ public_protocol }}://{{ ironic_public_address }}:{{ ironic_api_port }}'
         region_name={{ openstack_region_name }}
         auth={{ '{{ openstack_ironic_auth }}' }}"
     -e "{'openstack_ironic_auth':{{ openstack_ironic_auth }}}"
@@ -20,7 +20,7 @@
   run_once: True
 
 - name: Creating the Ironic project, user, and role
-  command: docker exec -t kolla_ansible /usr/bin/ansible localhost
+  command: docker exec -t kolla_toolbox /usr/bin/ansible localhost
     -m kolla_keystone_user
     -a "project=service
         user={{ ironic_keystone_user }}

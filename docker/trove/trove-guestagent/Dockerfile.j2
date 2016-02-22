@@ -7,10 +7,11 @@ MAINTAINER {{ maintainer }}
 RUN yum install -y openstack-trove-guestagent \
   && yum clean all
 
-    {% elif base_distro in ['opensuse', 'sles'] %}
+    {% elif base_distro in ['ubuntu'] %}
 
-RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
-    && /bin/false
+RUN apt-get install -y --no-install-recommends \
+        trove-guestagent \
+    && apt-get clean
 
     {% endif %}
 {% endif %}

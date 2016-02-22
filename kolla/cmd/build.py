@@ -64,6 +64,10 @@ class KollaUnknownBuildTypeException(Exception):
     pass
 
 
+class KollaMismatchBaseTypeException(Exception):
+    pass
+
+
 class KollaRpmSetupUnknownConfig(Exception):
     pass
 
@@ -268,13 +272,16 @@ class WorkerThread(threading.Thread):
                           'w') as tar:
             tar.add(plugins_path, arcname='plugins')
 
+        # Pull the latest image for the base distro only
+        pull = True if image['parent'] is None else False
+
         image['logs'] = str()
         buildargs = self.update_buildargs()
         for response in self.dc.build(path=image['path'],
                                       tag=image['fullname'],
                                       nocache=self.nocache,
                                       rm=True,
-                                      pull=False,
+                                      pull=pull,
                                       forcerm=self.forcerm,
                                       buildargs=buildargs):
             stream = json.loads(response.decode('utf-8'))
@@ -319,11 +326,19 @@ class KollaWorker(object):
         rpm_setup_config = filter(None, conf.rpm_setup_config)
         self.rpm_setup = self.build_rpm_setup(rpm_setup_config)
 
+        rh_base = ['fedora', 'centos', 'oraclelinux', 'rhel']
+        rh_type = ['source', 'binary', 'rdo', 'rhos']
+        deb_base = ['ubuntu', 'debian']
+        deb_type = ['source', 'binary']
+
+        if not ((self.base in rh_base and self.install_type in rh_type) or
+                (self.base in deb_base and self.install_type in deb_type)):
+            raise KollaMismatchBaseTypeException(
+                '{} is unavailable for {}'.format(self.install_type, self.base)
+            )
+
         if self.install_type == 'binary':
-            if self.base in ['opensuse', 'sles']:
-                self.install_metatype = 'obs'
-            else:
-                self.install_metatype = 'rdo'
+            self.install_metatype = 'rdo'
         elif self.install_type == 'source':
             self.install_metatype = 'mixed'
         elif self.install_type == 'rdo':
@@ -332,12 +347,6 @@ class KollaWorker(object):
         elif self.install_type == 'rhos':
             self.install_type = 'binary'
             self.install_metatype = 'rhos'
-        elif self.install_type == 'obs':
-            self.install_type = 'binary'
-            self.install_metatype = 'obs'
-        elif self.install_type == 'soc':
-            self.install_type = 'binary'
-            self.install_metatype = 'soc'
         else:
             raise KollaUnknownBuildTypeException(
                 'Unknown install type'
@@ -401,6 +410,19 @@ class KollaWorker(object):
 
         return rpm_setup
 
+    def copy_apt_files(self):
+        if self.conf.apt_sources_list:
+            shutil.copyfile(
+                self.conf.apt_sources_list,
+                os.path.join(self.working_dir, "base", "sources.list")
+            )
+
+        if self.conf.apt_preferences:
+            shutil.copyfile(
+                self.conf.apt_preferences,
+                os.path.join(self.working_dir, "base", "apt_preferences")
+            )
+
     def setup_working_dir(self):
         """Creates a working directory for use while building"""
         ts = time.time()
@@ -408,6 +430,7 @@ class KollaWorker(object):
         self.temp_dir = tempfile.mkdtemp(prefix='kolla-' + ts)
         self.working_dir = os.path.join(self.temp_dir, 'docker')
         shutil.copytree(self.images_dir, self.working_dir)
+        self.copy_apt_files()
         LOG.debug('Created working dir: %s', self.working_dir)
 
     def set_time(self):
@@ -470,7 +493,15 @@ class KollaWorker(object):
 
         if self.conf.profile:
             for profile in self.conf.profile:
-                filter_ += self.conf.profiles[profile]
+                if profile not in self.conf.profiles:
+                    self.conf.register_opt(cfg.ListOpt(profile,
+                                                       default=[]),
+                                           'profiles')
+                if len(self.conf.profiles[profile]) == 0:
+                    msg = 'Profile: {} does not exist'.format(profile)
+                    raise ValueError(msg)
+                else:
+                    filter_ += self.conf.profiles[profile]
 
         if filter_:
             patterns = re.compile(r"|".join(filter_).join('()'))
@@ -581,7 +612,9 @@ class KollaWorker(object):
                 for plugin in [match.group(0) for match in
                                (re.search('{}-plugin-.+'.format(image['name']),
                                           section) for section in
-                               self.conf._groups) if match]:
+                               self.conf.list_all_sections()) if match]:
+                    self.conf.register_opts(common_config.get_source_opts(),
+                                            plugin)
                     image['plugins'].append(
                         process_source_installation(image, plugin))
 

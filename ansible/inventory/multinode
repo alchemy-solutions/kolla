@@ -30,6 +30,9 @@ storage01
 [kibana:children]
 control
 
+[elasticsearch:children]
+control
+
 [haproxy:children]
 network
 
@@ -37,6 +40,9 @@ network
 control
 
 [rabbitmq:children]
+control
+
+[mongodb:children]
 control
 
 [keystone:children]
@@ -127,7 +133,13 @@ nova
 [neutron-server:children]
 control
 
-[neutron-agents:children]
+[neutron-dhcp-agent:children]
+neutron
+
+[neutron-l3-agent:children]
+neutron
+
+[neutron-metadata-agent:children]
 neutron
 
 # Cinder

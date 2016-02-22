@@ -7,13 +7,21 @@ MAINTAINER {{ maintainer }}
 RUN yum -y install openstack-swift \
     && yum clean all
 
-    {% elif base_distro in ['opensuse', 'sles'] %}
-
-RUN zypper -n install openstack-swift \
-    && zypper clean -a
-
     {% endif %}
 {% elif install_type == 'source' %}
+    {% if base_distro in ['centos', 'fedora', 'oraclelinux', 'rhel'] %}
+
+RUN yum -y install \
+        liberasurecode-devel \
+    && yum clean all
+
+    {% elif base_distro in ['ubuntu'] %}
+
+RUN apt-get install -y --no-install-recommends \
+        liberasurecode-dev \
+    && apt-get clean
+
+    {% endif %}
 
 ADD swift-base-archive /swift-base-source
 RUN ln -s swift-base-source/* swift \
@@ -25,6 +33,5 @@ RUN ln -s swift-base-source/* swift \
 
 {% endif %}
 
-COPY config-swift.sh /usr/local/bin/kolla_config_swift
 COPY build-swift-ring.py /usr/local/bin/kolla_build_swift_ring
-RUN mkdir /opt/swift
+RUN mkdir -p /opt/swift

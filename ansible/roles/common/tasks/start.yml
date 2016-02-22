@@ -3,15 +3,30 @@
   kolla_docker:
     action: "start_container"
     common_options: "{{ docker_common_options }}"
+    environment:
+      KOLLA_CONFIG_STRATEGY: "{{ config_strategy }}"
+      SKIP_LOG_SETUP:
     image: "{{ rsyslog_image_full }}"
     name: "rsyslog"
     privileged: True
     volumes:
       - "{{ node_config_directory }}/rsyslog/:{{ container_config_directory }}/:ro"
-      - "/var/lib/kolla/dev:/dev"
       - "rsyslog:/var/log"
+      - "rsyslog_socket:/var/lib/kolla/rsyslog/"
 
-- name: Starting kolla-ansible container
+- name: Starting heka container
+  kolla_docker:
+    action: "start_container"
+    common_options: "{{ docker_common_options }}"
+    image: "{{ heka_image_full }}"
+    name: "heka"
+    volumes:
+      - "{{ node_config_directory }}/heka/:{{ container_config_directory }}/:ro"
+      - "kolla_logs:/var/log/kolla/"
+      - "heka:/var/cache/hekad"
+      - "heka_socket:/var/lib/kolla/heka/"
+
+- name: Starting kolla-toolbox container
   kolla_docker:
     action: "start_container"
     common_options: "{{ docker_common_options }}"
@@ -19,9 +34,9 @@
       ANSIBLE_NOCOLOR: "1"
       ANSIBLE_LIBRARY: "/usr/share/ansible"
     image: "{{ ansible_image_full }}"
-    name: "kolla_ansible"
+    name: "kolla_toolbox"
     privileged: True
     volumes:
       - "/dev/:/dev/"
       - "/run/:/run/"
-      - "/var/lib/kolla/dev/log:/dev/log"
+      - "kolla_logs:/var/log/kolla/"

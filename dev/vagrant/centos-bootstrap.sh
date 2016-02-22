@@ -19,6 +19,7 @@ else
     SUPPORT_NODE=support01
 fi
 REGISTRY=operator.local:${REGISTRY_PORT}
+ADMIN_PROTOCOL="http"
 
 # Install common packages and do some prepwork.
 function prep_work {
@@ -58,7 +59,8 @@ EOF
 
         # Despite it shipping with /etc/sysconfig/docker, Docker is not configured to
         # load it from it's service file.
-        sed -i -r "s,(ExecStart)=(.+),\1=/usr/bin/docker -d --insecure-registry ${REGISTRY} --registry-mirror=http://${REGISTRY}," /usr/lib/systemd/system/docker.service
+        sed -i -r "s|(ExecStart)=(.+)|\1=/usr/bin/docker daemon --insecure-registry ${REGISTRY} --registry-mirror=http://${REGISTRY}|" /usr/lib/systemd/system/docker.service
+        sed -i 's|^MountFlags=.*|MountFlags=shared|' /usr/lib/systemd/system/docker.service
 
         systemctl daemon-reload
         systemctl enable docker
@@ -83,7 +85,7 @@ function configure_kolla {
 # Configure the operator node and install some additional packages.
 function configure_operator {
     yum install -y git mariadb && yum clean all
-    pip install --upgrade "ansible<2" python-openstackclient tox
+    pip install --upgrade "ansible<2" python-openstackclient python-neutronclient tox
 
     pip install ~vagrant/kolla
 
@@ -117,7 +119,7 @@ EOF
 
     # The openrc file.
     cat > ~vagrant/openrc <<EOF
-export OS_AUTH_URL="http://${SUPPORT_NODE}:35357/v3"
+export OS_AUTH_URL="$(ADMIN_PROTOCOL)://${SUPPORT_NODE}:35357/v3"
 export OS_USERNAME=admin
 export OS_PASSWORD=password
 export OS_TENANT_NAME=admin
@@ -125,6 +127,12 @@ export OS_VOLUME_API_VERSION=3
 export OS_USER_DOMAIN_ID=default
 EOF
     chown vagrant: ~vagrant/openrc
+
+    mkdir -p /etc/kolla/config/nova/
+    cat > /etc/kolla/config/nova/nova-compute.conf <<EOF
+[libvirt]
+virt_type=qemu
+EOF
 
 
     # Launch a local registry (and mirror) to speed up pulling images.
@@ -139,7 +147,7 @@ EOF
             -e MIRROR_SOURCE_INDEX=https://index.docker.io \
             -e STORAGE_PATH=/var/lib/registry \
             -v /data/host/registry-storage:/var/lib/registry \
-            registry:0.9.1
+            registry:2
     fi
 }
 

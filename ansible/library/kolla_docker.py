@@ -33,11 +33,13 @@ options:
     required: True
     type: str
     choices:
+      - compare_image
       - create_volume
       - pull_image
       - remove_container
       - remove_volume
       - start_container
+      - stop_container
   api_version:
     description:
       - The version of the api for docker-py to use when contacting docker
@@ -85,6 +87,12 @@ options:
       - Name of the docker image
     required: False
     type: str
+  labels:
+    description:
+      - List of labels to apply to container
+    required: False
+    type: dict
+    default: dict()
   pid_mode:
     description:
       - Set docker pid namespace
@@ -214,7 +222,7 @@ class DockerWorker(object):
                     return image
 
     def check_volume(self):
-        for vol in self.dc.volumes()['Volumes']:
+        for vol in self.dc.volumes()['Volumes'] or list():
             if vol['Name'] == self.params.get('name'):
                 return vol
 
@@ -224,14 +232,17 @@ class DockerWorker(object):
             if find_name in cont['Names']:
                 return cont
 
-    def check_container_differs(self):
+    def get_container_info(self):
         container = self.check_container()
         if not container:
-            return True
-        container_info = self.dc.inspect_container(self.params.get('name'))
+            return None
+        return self.dc.inspect_container(self.params.get('name'))
 
+    def check_container_differs(self):
+        container_info = self.get_container_info()
         return (
             self.compare_image(container_info) or
+            self.compare_labels(container_info) or
             self.compare_privileged(container_info) or
             self.compare_pid_mode(container_info) or
             self.compare_volumes(container_info) or
@@ -254,10 +265,27 @@ class DockerWorker(object):
         if new_privileged != current_privileged:
             return True
 
-    def compare_image(self, container_info):
+    def compare_image(self, container_info=None):
+        container_info = container_info or self.get_container_info()
+        if not container_info:
+            return True
         new_image = self.check_image()
         current_image = container_info['Image']
         if new_image['Id'] != current_image:
+            return True
+
+    def compare_labels(self, container_info):
+        new_labels = self.params.get('labels')
+        current_labels = container_info['Config'].get('Labels', dict())
+        image_labels = self.check_image().get('Labels', dict())
+        for k, v in image_labels.iteritems():
+            if k in new_labels:
+                if v != new_labels[k]:
+                    return True
+            else:
+                del current_labels[k]
+
+        if new_labels != current_labels:
             return True
 
     def compare_volumes_from(self, container_info):
@@ -337,23 +365,35 @@ class DockerWorker(object):
         ]
 
         for status in reversed(statuses):
-            # NOTE(jeffrey4l): Get the last not empty status with status
-            # property
+            if 'error' in status:
+                if status['error'].endswith('not found'):
+                    self.module.fail_json(
+                        msg="The requested image does not exist: {}:{}".format(
+                            image, tag),
+                        failed=True
+                    )
+                else:
+                    self.module.fail_json(
+                        msg="Unknown error message: {}".format(
+                            status['error']),
+                        failed=True
+                    )
+
             if status and status.get('status'):
                 # NOTE(SamYaple): This allows us to use v1 and v2 docker
                 # registries.  Eventually docker will stop supporting v1
                 # registries and when that happens we can remove this.
-                if 'legacy registry' in status.get('status'):
+                if 'legacy registry' in status['status']:
                     continue
-                elif "Downloaded newer image for" in status.get('status'):
+                elif 'Downloaded newer image for' in status['status']:
                     self.changed = True
                     return
-                elif "Image is up to date for" in status.get('status'):
+                elif 'Image is up to date for' in status['status']:
                     return
                 else:
                     self.module.fail_json(
-                        msg="Invalid status returned from pull",
-                        changed=True,
+                        msg="Unknown status message: {}".format(
+                            status['status']),
                         failed=True
                     )
 
@@ -419,6 +459,7 @@ class DockerWorker(object):
             'detach': self.params.get('detach'),
             'environment': self.params.get('environment'),
             'host_config': self.build_host_config(binds),
+            'labels': self.params.get('labels'),
             'image': self.params.get('image'),
             'name': self.params.get('name'),
             'volumes': volumes,
@@ -459,6 +500,13 @@ class DockerWorker(object):
             if self.params.get('remove_on_exit'):
                 self.remove_container()
 
+    def stop_container(self):
+        name = self.params.get('name')
+        container = self.check_container()
+        if not container['Status'].startswith('Exited '):
+            self.changed = True
+            self.dc.stop(name)
+
     def create_volume(self):
         if not self.check_volume():
             self.changed = True
@@ -483,17 +531,20 @@ class DockerWorker(object):
 def generate_module():
     argument_spec = dict(
         common_options=dict(required=False, type='dict', default=dict()),
-        action=dict(requried=True, type='str', choices=['create_volume',
+        action=dict(requried=True, type='str', choices=['compare_image',
+                                                        'create_volume',
                                                         'pull_image',
                                                         'remove_container',
                                                         'remove_volume',
-                                                        'start_container']),
+                                                        'start_container',
+                                                        'stop_container']),
         api_version=dict(required=False, type='str', default='auto'),
         auth_email=dict(required=False, type='str'),
         auth_password=dict(required=False, type='str'),
         auth_registry=dict(required=False, type='str'),
         auth_username=dict(required=False, type='str'),
         detach=dict(required=False, type='bool', default=True),
+        labels=dict(required=False, type='dict', default=dict()),
         name=dict(required=False, type='str'),
         environment=dict(required=False, type='dict'),
         image=dict(required=False, type='str'),
@@ -559,8 +610,11 @@ def main():
 
     try:
         dw = DockerWorker(module)
-        getattr(dw, module.params.get('action'))()
-        module.exit_json(changed=dw.changed)
+        # TODO(inc0): We keep it bool to have ansible deal with cosistent
+        # types. If we ever add method that will have to return some
+        # meaningful data, we need to refactor all methods to return dicts.
+        result = bool(getattr(dw, module.params.get('action'))())
+        module.exit_json(changed=dw.changed, result=result)
     except Exception as e:
         module.exit_json(failed=True, changed=True, msg=repr(e))
 

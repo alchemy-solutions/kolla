@@ -7,11 +7,6 @@ MAINTAINER {{ maintainer }}
 RUN yum -y install openstack-swift-object \
     && yum clean all
 
-    {% elif base_distro in ['opensuse', 'sles'] %}
-
-RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
-    && /bin/false
-
     {% endif %}
 {% endif %}
 

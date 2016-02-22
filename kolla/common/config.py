@@ -21,13 +21,14 @@ from kolla import version
 RDO_MIRROR = "http://trunk.rdoproject.org/centos7"
 DELOREAN = "{}/current-passed-ci/delorean.repo".format(RDO_MIRROR)
 DELOREAN_DEPS = "{}/delorean-deps.repo".format(RDO_MIRROR)
-INSTALL_TYPE_CHOICES = ['binary', 'source', 'rdo', 'rhos', 'obs', 'soc']
+INSTALL_TYPE_CHOICES = ['binary', 'source', 'rdo', 'rhos']
 
 _PROFILE_OPTS = [
     cfg.ListOpt('infra',
-                default=['ceph', 'data', 'mariadb', 'haproxy',
-                         'keepalived', 'kolla-ansible', 'memcached',
-                         'mongodb', 'openvswitch', 'rabbitmq', 'rsyslog'],
+                default=['ceph', 'mariadb', 'haproxy',
+                         'keepalived', 'kolla-toolbox', 'memcached',
+                         'mongodb', 'openvswitch', 'rabbitmq', 'rsyslog',
+                         'heka'],
                 help='Infra images'),
     cfg.ListOpt('main',
                 default=['cinder', 'ceilometer', 'glance', 'heat',
@@ -39,17 +40,15 @@ _PROFILE_OPTS = [
                          'magnum', 'mistral', 'trove,' 'zaqar', 'zookeeper'],
                 help='Aux Images'),
     cfg.ListOpt('default',
-                default=['data', 'kolla-ansible', 'glance', 'haproxy',
+                default=['kolla-toolbox', 'glance', 'haproxy',
                          'heat', 'horizon', 'keepalived', 'keystone',
                          'memcached', 'mariadb', 'neutron', 'nova',
-                         'openvswitch', 'rabbitmq', 'rsyslog'],
+                         'openvswitch', 'rabbitmq', 'rsyslog', 'heka'],
                 help='Default images'),
     cfg.ListOpt('gate',
-                default=['ceph', 'cinder', 'data', 'dind', 'glance',
-                         'haproxy', 'heat', 'horizon', 'keepalived',
-                         'keystone', 'kolla-ansible', 'mariadb',
-                         'memcached', 'neutron', 'nova', 'openvswitch',
-                         'rabbitmq', 'rsyslog'],
+                default=['glance', 'haproxy', 'keepalived', 'keystone',
+                         'kolla-toolbox', 'mariadb', 'memcached', 'neutron',
+                         'nova', 'openvswitch', 'rabbitmq', 'rsyslog', 'heka'],
                 help='Gate images'),
     cfg.ListOpt('mesos',
                 default=['chronos', 'marathon', 'mesos-master', 'mesos-slave',
@@ -119,7 +118,7 @@ _CLI_OPTS = [
     cfg.StrOpt('type', short='t', default='binary',
                choices=INSTALL_TYPE_CHOICES,
                dest='install_type', deprecated_group='kolla-build',
-               help=('The method of the Openstack install. The valid'
+               help=('The method of the OpenStack install. The valid'
                      ' types are: {}'.format(
                          ', '.join(INSTALL_TYPE_CHOICES)))),
     cfg.IntOpt('threads', short='T', default=8, min=1,
@@ -141,8 +140,10 @@ _BASE_OPTS = [
                help='The MAINTAINER field'),
     cfg.ListOpt('rpm_setup_config', default=[DELOREAN, DELOREAN_DEPS],
                 deprecated_group='kolla-build',
-                help=('Comma separated list of .rpm or .repo file(s)'
-                      'or URL(s) to install before building containers'))
+                help=('Comma separated list of .rpm or .repo file(s) '
+                      'or URL(s) to install before building containers')),
+    cfg.StrOpt('apt_sources_list', help=('Path to custom sources.list')),
+    cfg.StrOpt('apt_preferences', help=('Path to custom apt/preferences'))
 ]
 
 
@@ -245,7 +246,7 @@ def get_source_opts(type_=None, location=None, reference=None):
             cfg.StrOpt('location', default=location,
                        help='The location for source install'),
             cfg.StrOpt('reference', default=reference,
-                       help=('Git reference to pull, commit sha, tag'
+                       help=('Git reference to pull, commit sha, tag '
                              'or branch name'))]
 
 

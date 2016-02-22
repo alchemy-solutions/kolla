@@ -6,16 +6,14 @@ MAINTAINER {{ maintainer }}
 RUN yum install -y rsync \
     && yum clean all
 
-{% elif base_distro in ['opensuse', 'sles'] %}
-
-RUN zypper -n install rsync \
-    && zypper clean -a
-
 {% elif base_distro in ['ubuntu', 'debian'] %}
 
 RUN apt-get install -y --no-install-recommends rsync \
     && apt-get clean
 
 {% endif %}
+
+COPY extend_start.sh /usr/local/bin/kolla_extend_start
+RUN chmod 755 /usr/local/bin/kolla_extend_start
 
 {{ include_footer }}

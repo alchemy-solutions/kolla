@@ -1,14 +1,14 @@
 ---
 - name: Creating the Cinder service and endpoint
-  command: docker exec -t kolla_ansible /usr/bin/ansible localhost
+  command: docker exec -t kolla_toolbox /usr/bin/ansible localhost
     -m kolla_keystone_service
     -a "service_name=cinder
         service_type=volume
         description='Openstack Block Storage'
         endpoint_region={{ openstack_region_name }}
-        admin_url='http://{{ kolla_internal_address }}:{{ cinder_api_port }}/v2/%(tenant_id)s'
-        internal_url='http://{{ kolla_internal_address }}:{{ cinder_api_port }}/v2/%(tenant_id)s'
-        public_url='http://{{ kolla_external_address }}:{{ cinder_api_port }}/v2/%(tenant_id)s'
+        admin_url='{{ admin_protocol }}://{{ kolla_internal_address }}:{{ cinder_api_port }}/v2/%(tenant_id)s'
+        internal_url='{{ internal_protocol }}://{{ kolla_internal_address }}:{{ cinder_api_port }}/v2/%(tenant_id)s'
+        public_url='{{ public_protocol }}://{{ kolla_external_address }}:{{ cinder_api_port }}/v2/%(tenant_id)s'
         region_name={{ openstack_region_name }}
         auth={{ '{{ openstack_cinder_auth }}' }}"
     -e  "{'openstack_cinder_auth':{{ openstack_cinder_auth }}}"
@@ -20,15 +20,15 @@
   run_once: True
 
 - name: Creating the Cinder v2 service and endpoint
-  command: docker exec -t kolla_ansible /usr/bin/ansible localhost
+  command: docker exec -t kolla_toolbox /usr/bin/ansible localhost
     -m kolla_keystone_service
     -a "service_name=cinderv2
         service_type=volumev2
         description='Openstack Block Storage'
         endpoint_region={{ openstack_region_name }}
-        admin_url='http://{{ kolla_internal_address }}:{{ cinder_api_port }}/v2/%(tenant_id)s'
-        internal_url='http://{{ kolla_internal_address }}:{{ cinder_api_port }}/v2/%(tenant_id)s'
-        public_url='http://{{ kolla_external_address }}:{{ cinder_api_port }}/v2/%(tenant_id)s'
+        admin_url='{{ admin_protocol }}://{{ kolla_internal_address }}:{{ cinder_api_port }}/v2/%(tenant_id)s'
+        internal_url='{{ internal_protocol }}://{{ kolla_internal_address }}:{{ cinder_api_port }}/v2/%(tenant_id)s'
+        public_url='{{ public_protocol }}://{{ kolla_external_address }}:{{ cinder_api_port }}/v2/%(tenant_id)s'
         region_name={{ openstack_region_name }}
         auth={{ '{{ openstack_cinder_auth }}' }}"
     -e  "{'openstack_cinder_auth':{{ openstack_cinder_auth }}}"
@@ -40,7 +40,7 @@
   run_once: True
 
 - name: Creating the Cinder project, user, and role
-  command: docker exec -t kolla_ansible /usr/bin/ansible localhost
+  command: docker exec -t kolla_toolbox /usr/bin/ansible localhost
     -m kolla_keystone_user
     -a "project=service
         user=cinder
