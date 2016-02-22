@@ -18,8 +18,7 @@ RUN yum -y install \
 
 RUN sed -i "s|WEBROOT = '/dashboard/'|WEBROOT = '/'|" /etc/openstack-dashboard/local_settings \
     && cp /usr/share/openstack-dashboard/manage.py /usr/bin/manage.py \
-    && /usr/bin/python /usr/bin/manage.py collectstatic --noinput --clear \
-    && /usr/bin/python /usr/bin/manage.py compress --force
+    && /usr/bin/python /usr/bin/manage.py collectstatic --noinput --clear
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
@@ -37,7 +36,7 @@ RUN zypper -n install \
 
     {% endif %}
 
-RUN useradd -m --user-group horizon \
+RUN useradd -m --user-group -G www horizon \
     && sed -i -r 's,^(Listen 80),#\1,' /etc/apache2/listen.conf \
     && cp /etc/apache2/conf.d/openstack-dashboard.conf.sample /etc/apache2/vhosts.d/openstack-dashboard.conf \
     && chown -R horizon: /srv/www/openstack-dashboard \
@@ -57,7 +56,6 @@ RUN cp /usr/share/openstack-dashboard/openstack_dashboard/conf/*.json /etc/opens
     && sed -i "s|^POLICY_FILES_PATH|POLICY_FILES_PATH = '/etc/openstack-dashboard'|" /etc/openstack-dashboard/local_settings.py \
     && cp /usr/share/openstack-dashboard/manage.py /usr/bin/manage.py \
     && /usr/bin/python /usr/bin/manage.py collectstatic --noinput \
-    && /usr/bin/manage.py compress --force \
     && rm /etc/apache2/conf-enabled/openstack-dashboard.conf \
     && echo "" > /etc/apache2/ports.conf \
     && rm /etc/openstack-dashboard/local_settings.py \
@@ -96,7 +94,6 @@ RUN ln -s horizon-source/* horizon \
     && cp /horizon/openstack_dashboard/local/local_settings.py.example /etc/openstack-dashboard/local_settings \
     && cp /horizon/manage.py /var/lib/kolla/venv/bin/manage.py \
     && /var/lib/kolla/venv/bin/python /var/lib/kolla/venv/bin/manage.py collectstatic --noinput --clear \
-    && /var/lib/kolla/venv/bin/python /var/lib/kolla/venv/bin/manage.py compress --force \
     && chown -R horizon: /etc/openstack-dashboard /home/horizon /var/lib/kolla/venv/lib/python2.7/site-packages/static
 
 {% endif %}
