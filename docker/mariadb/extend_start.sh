@@ -34,7 +34,8 @@ fi
 # This catches all cases of the BOOTSTRAP variable being set, including empty
 if [[ "${!KOLLA_BOOTSTRAP[@]}" ]] && [[ ! -e /var/lib/mysql/cluster.exists ]]; then
     ARGS="--wsrep-new-cluster"
-    mysql_install_db
+    DATADIR="$(mysqld --verbose --help 2>/dev/null | awk '$1 == "datadir" { print $2; exit }')"
+    mysql_install_db --user=mysql --datadir="$DATADIR" --rpm
     bootstrap_db
     touch /var/lib/mysql/cluster.exists
 fi

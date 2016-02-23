@@ -9,6 +9,11 @@ RUN yum install -y \
         python-ceilometerclient \
     && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install -y openstack-ceilometer-agent-compute \
+    && yum clean all
+
     {% elif base_distro in ['ubuntu'] %}
 
 RUN apt-get install -y --no-install-recommends \

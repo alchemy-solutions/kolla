@@ -2,13 +2,11 @@ FROM {{ namespace }}/{{ image_prefix }}base:{{ tag }}
 MAINTAINER {{ maintainer }}
 
 {% if base_distro in ['fedora', 'centos', 'oraclelinux', 'rhel'] %}
-
 RUN yum -y install \
         git \
         iproute \
         mariadb-libs \
         openssl \
-        patch \
     && yum clean all
 
 {% elif base_distro in ['opensuse', 'sles'] %}
@@ -17,22 +15,21 @@ RUN zypper -n install \
         git-core \
         iproute2 \
         openssl \
-        patch \
     && zypper clean -a
 
 {% endif %}
 {% if install_type == 'binary' %}
-
     {% if base_distro in ['fedora', 'centos', 'oraclelinux', 'rhel'] %}
 
-COPY oslo-log.patch /var/lib/kolla/oslo-log.patch
-
+# TODO(Allen) Remove python-dogpile-cache after the requirement of
+# python-ironicclient is fixed.
 RUN yum -y install \
         python-barbicanclient \
         python-ceilometerclient \
         python-congressclient \
         python-designateclient \
         python-heatclient \
+        python-dogpile-cache \
         python-ironicclient \
         python-magnumclient \
         python-manilaclient \
@@ -47,9 +44,7 @@ RUN yum -y install \
         python-zaqarclient \
         python-openstackclient \
         python-keystoneauth1 \
-        python-oslo-log \
-    && yum clean all \
-    && patch -d /usr/lib/python2.7/site-packages/oslo_log -p1 < /var/lib/kolla/oslo-log.patch
+    && yum clean all
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
@@ -76,7 +71,6 @@ RUN sed -i '/pam_systemd/d' /etc/pam.d/common-session
 
 # This will prevent questions from being asked during the install
 ENV DEBIAN_FRONTEND noninteractive
-COPY oslo-log-bug1499620.patch /var/lib/kolla/oslo-log-bug1499620.patch
 # There is no python-tuskarclient in ubuntu 14.04
 RUN apt-get install -y --no-install-recommends \
         python-barbicanclient \
@@ -101,9 +95,6 @@ RUN apt-get install -y --no-install-recommends \
         openssl \
         patch \
     && apt-get clean
-
-# python-oslo-log patch to bug 1499620 (it fixed in python-oslo-log 1.11.1)
-RUN patch -d /usr/lib/python2.7/site-packages -p1 < /var/lib/kolla/oslo-log-bug1499620.patch
 
     {% endif %}
 {% elif install_type == 'source' %}
@@ -143,7 +134,7 @@ RUN apt-get install -y --no-install-recommends \
 
 ADD openstack-base-archive /openstack-base-source
 RUN ln -s openstack-base-source/* /requirements \
-    && mkdir /var/lib/kolla \
+    && mkdir -p /var/lib/kolla \
     && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
     && python get-pip.py \
     && rm get-pip.py \

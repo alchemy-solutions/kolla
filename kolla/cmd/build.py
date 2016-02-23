@@ -328,17 +328,23 @@ class KollaWorker(object):
 
         rh_base = ['fedora', 'centos', 'oraclelinux', 'rhel']
         rh_type = ['source', 'binary', 'rdo', 'rhos']
+        sl_base = ['opensuse', 'sles']
+        sl_type = ['source', 'binary', 'obs', 'soc']
         deb_base = ['ubuntu', 'debian']
         deb_type = ['source', 'binary']
 
         if not ((self.base in rh_base and self.install_type in rh_type) or
+                (self.base in sl_base and self.install_type in sl_type) or
                 (self.base in deb_base and self.install_type in deb_type)):
             raise KollaMismatchBaseTypeException(
                 '{} is unavailable for {}'.format(self.install_type, self.base)
             )
 
         if self.install_type == 'binary':
-            self.install_metatype = 'rdo'
+            if self.base in sl_base:
+                self.install_metatype = 'obs'
+            else:
+                self.install_metatype = 'rdo'
         elif self.install_type == 'source':
             self.install_metatype = 'mixed'
         elif self.install_type == 'rdo':
@@ -347,6 +353,12 @@ class KollaWorker(object):
         elif self.install_type == 'rhos':
             self.install_type = 'binary'
             self.install_metatype = 'rhos'
+        elif self.install_type == 'obs':
+            self.install_type = 'binary'
+            self.install_metatype = 'rdo'
+        elif self.install_type == 'soc':
+            self.install_type = 'binary'
+            self.install_metatype = 'soc'
         else:
             raise KollaUnknownBuildTypeException(
                 'Unknown install type'

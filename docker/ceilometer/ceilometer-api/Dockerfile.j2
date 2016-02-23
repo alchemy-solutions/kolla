@@ -12,6 +12,12 @@ RUN yum install -y openstack-ceilometer-api \
 RUN zypper -n install openstack-ceilometer-api \
     && zypper clean -a
 
+    {% elif base_distro in ['ubuntu'] %}
+
+RUN apt-get install -y --no-install-recommends \
+        ceilometer-api \
+    && apt-get clean
+
     {% endif %}
 {% endif %}
 
