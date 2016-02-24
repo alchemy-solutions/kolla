@@ -7,6 +7,12 @@ MAINTAINER {{ maintainer }}
 RUN yum -y install openstack-manila-share \
     && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        openstack-manila-share \
+    && zypper clean -a
+
     {% endif %}
 {% endif %}
 

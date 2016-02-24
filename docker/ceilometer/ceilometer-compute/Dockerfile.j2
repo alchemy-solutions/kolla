@@ -11,8 +11,9 @@ RUN yum install -y \
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
-RUN zypper -n install -y openstack-ceilometer-agent-compute \
-    && yum clean all
+RUN zypper -n install \
+        openstack-ceilometer-agent-compute \
+    && zypper clean -a
 
     {% elif base_distro in ['ubuntu'] %}
 

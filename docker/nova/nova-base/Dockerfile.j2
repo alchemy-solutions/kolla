@@ -11,6 +11,19 @@ RUN yum -y install \
         bridge-utils \
     && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        iptables \
+        ebtables \
+        dnsmasq \
+        bridge-utils \
+        openstack-nova \
+        python-keystoneclient \
+        python-cinderclient \
+    && zypper clean -a \
+    && chown -R nova: /var/lib/nova/tmp
+
     {% elif base_distro in ['ubuntu'] %}
 
 RUN apt-get install -y --no-install-recommends \

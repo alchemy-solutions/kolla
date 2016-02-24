@@ -16,7 +16,7 @@ RUN yum -y install openstack-cinder \
 RUN zypper -n install openstack-cinder \
     python-automaton \
     lvm2 \
-    ceph-common
+    ceph-common \
   && zypper clean -a \
   && mkdir -p /etc/ceph
 

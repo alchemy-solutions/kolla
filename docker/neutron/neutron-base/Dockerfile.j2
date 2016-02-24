@@ -10,6 +10,16 @@ RUN yum -y install \
         openvswitch \
     && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        openstack-neutron \
+        openstack-neutron-server \
+        openvswitch \
+        openvswitch-switch \
+    && zypper clean -a \
+    && ln -s /run/openvswitch /var/run/
+
     {% elif base_distro in ['ubuntu'] %}
 
 RUN apt-get install -y --no-install-recommends \

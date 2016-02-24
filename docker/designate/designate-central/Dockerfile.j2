@@ -7,6 +7,12 @@ MAINTAINER {{ maintainer }}
 RUN yum install -y openstack-designate-central \
     && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        openstack-designate-central \
+    && zypper clean -a
+
     {% elif base_distro in ['ubuntu']%}
 
 RUN apt-get install -y --no-install-recommends \

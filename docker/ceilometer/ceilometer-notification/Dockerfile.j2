@@ -9,8 +9,9 @@ RUN yum install -y openstack-ceilometer-notification \
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
-RUN zypper -n install openstack-ceilometer-agent-notification \
-  && yum clean all
+RUN zypper -n install \
+        openstack-ceilometer-agent-notification \
+  && zypper clean -a
 
     {% elif base_distro in ['ubuntu'] %}
 

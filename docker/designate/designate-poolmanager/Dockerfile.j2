@@ -10,6 +10,13 @@ RUN yum install -y \
         bind \
     && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+# The bind-utils package here is only to provide the rndc binary.
+RUN zypper -n install \
+        bind-utils \
+    && zypper clean -a
+
     {% elif base_distro in ['ubuntu'] %}
 
 RUN apt-get install -y --no-install-recommends \

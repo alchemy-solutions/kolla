@@ -12,8 +12,7 @@ RUN pip install ironic-discoverd
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
-RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
-    && /bin/false
+RUN pip install ironic-discoverd
 
     {% endif %}
 {% endif %}

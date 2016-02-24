@@ -1,5 +1,4 @@
 {% set apache_dir = 'apache2' if kolla_base_distro in ['ubuntu', 'debian'] else 'httpd' %}
-{% set site_dir = '/srv/www' if kolla_base_distro in ['opensuse', 'sles'] else '/var/www' %}
 {% set python_path = '/usr/lib/python2.7/site-packages' if kolla_install_type == 'binary' else '/var/lib/kolla/venv/lib/python2.7/site-packages' %}
 Listen {{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}:{{ keystone_public_port }}
 Listen {{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}:{{ keystone_admin_port }}
@@ -7,25 +6,27 @@ Listen {{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['addr
 <VirtualHost *:{{ keystone_public_port }}>
     WSGIDaemonProcess keystone-public processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP} python-path={{ python_path }}
     WSGIProcessGroup keystone-public
-    WSGIScriptAlias / {{ site_dir }}/cgi-bin/keystone/main
+    WSGIScriptAlias / /var/www/cgi-bin/keystone/main
     WSGIApplicationGroup %{GLOBAL}
     WSGIPassAuthorization On
     <IfVersion >= 2.4>
       ErrorLogFormat "%{cu}t %M"
     </IfVersion>
-    ErrorLog "|/usr/bin/logger -t keystone-error"
-    CustomLog "|/usr/bin/logger -t keystone-access" combined
+    ErrorLog "/var/log/kolla/{{ apache_dir }}/keystone-apache-public-error.log"
+    LogFormat "%h %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
+    CustomLog "/var/log/kolla/{{ apache_dir }}/keystone-apache-public-access.log" logformat
 </VirtualHost>
 
 <VirtualHost *:{{ keystone_admin_port }}>
     WSGIDaemonProcess keystone-admin processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP} python-path={{ python_path }}
     WSGIProcessGroup keystone-admin
-    WSGIScriptAlias / {{ site_dir }}/cgi-bin/keystone/admin
+    WSGIScriptAlias / /var/www/cgi-bin/keystone/admin
     WSGIApplicationGroup %{GLOBAL}
     WSGIPassAuthorization On
     <IfVersion >= 2.4>
       ErrorLogFormat "%{cu}t %M"
     </IfVersion>
-    ErrorLog "|/usr/bin/logger -t keystone-error"
-    CustomLog "|/usr/bin/logger -t keystone-access" combined
+    ErrorLog "/var/log/kolla/{{ apache_dir }}/keystone-apache-admin-error.log"
+    LogFormat "%h %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
+    CustomLog "/var/log/kolla/{{ apache_dir }}/keystone-apache-admin-access.log" logformat
 </VirtualHost>

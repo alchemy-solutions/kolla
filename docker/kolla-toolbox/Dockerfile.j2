@@ -11,7 +11,6 @@ RUN yum -y install \
         libxml2-devel \
         libxslt-devel \
         mariadb-devel \
-        mariadb-libs \
         MariaDB-shared \
         openssl-devel \
         python-devel \
@@ -21,14 +20,15 @@ RUN yum -y install \
 
 {% elif base_distro in ['opensuse', 'sles'] %}
 
-        #MariaDB-shared \
 RUN zypper -n install \
         gcc \
         git-core \
         libffi48-devel \
         libxml2-devel \
         libxslt-devel \
+        libmysqld-devel \
         libmysqlclient-devel \
+        libmysqlclient18 \
         libopenssl-devel \
         python-devel \
     && zypper clean -a

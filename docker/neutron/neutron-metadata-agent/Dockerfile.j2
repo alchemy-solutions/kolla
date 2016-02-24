@@ -1,8 +1,14 @@
 FROM {{ namespace }}/{{ image_prefix }}neutron-base:{{ tag }}
 MAINTAINER {{ maintainer }}
 
-{% if base_distro in ['ubuntu', 'debian'] %}
-    {% if install_type == 'binary' %}
+{% if install_type == 'binary' %}
+    {% if base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        openstack-neutron-metadata-agent \
+    && zypper clean -a
+
+    {% elif base_distro in ['ubuntu', 'debian'] %}
 
 RUN apt-get install -y --no-install-recommends \
         neutron-metadata-agent \

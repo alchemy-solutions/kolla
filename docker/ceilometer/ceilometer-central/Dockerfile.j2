@@ -9,8 +9,9 @@ RUN yum install -y openstack-ceilometer-central \
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
-RUN zypper -n install -y openstack-ceilometer-agent-central \
-    && yum clean all
+RUN zypper -n install \
+        openstack-ceilometer-agent-central \
+    && zypper clean -a
 
     {% elif base_distro in ['ubuntu'] %}
 

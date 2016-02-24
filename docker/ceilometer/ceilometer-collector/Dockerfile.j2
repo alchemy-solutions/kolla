@@ -9,8 +9,9 @@ RUN yum install -y openstack-ceilometer-collector \
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
-RUN zypper -n install -y openstack-ceilometer-collector \
-    && yum clean all
+RUN zypper -n install \
+        openstack-ceilometer-collector \
+    && zypper clean -a
 
     {% elif base_distro in ['ubuntu'] %}
 

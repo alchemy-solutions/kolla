@@ -19,8 +19,17 @@ RUN yum install -y \
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
-RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
-    && /bin/false
+RUN zypper -n install \
+        openstack-designate \
+        python-tooz \
+    && zypper clean -a
+
+    {% elif base_distro in ['ubuntu'] %}
+
+RUN apt-get install -y --no-install-recommends \
+        designate-common \
+        python-tooz \
+    && apt-get clean
 
     {% endif %}
 {% elif install_type == 'source' %}
@@ -31,7 +40,9 @@ RUN ln -s designate-base-source/* designate \
     && /var/lib/kolla/venv/bin/pip --no-cache-dir install --upgrade -c requirements/upper-constraints.txt /designate \
     && mkdir -p /etc/designate /var/log/designate /home/designate \
     && cp -r /designate/etc/designate/* /etc/designate/ \
-    && chown -R designate: /etc/designate /var/log/designate /home/designate
+    && mv /etc/designate/rootwrap.conf.sample /etc/designate/rootwrap.conf \
+    && chown -R designate: /etc/designate /var/log/designate /home/designate \
+    && sed -i 's|^exec_dirs.*|exec_dirs=/var/lib/kolla/venv/bin,/sbin,/usr/sbin,/bin,/usr/bin,/usr/local/bin,/usr/local/sbin|g' /etc/designate/rootwrap.conf
 
 {% endif %}
 

@@ -9,8 +9,9 @@ RUN yum -y install openstack-ironic-conductor \
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
-RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
-    && /bin/false
+RUN zypper -n install \
+        openstack-ironic-conductor \
+    && zypper clean all
 
     {% elif base_distro in ['ubuntu'] %}
 

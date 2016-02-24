@@ -11,6 +11,7 @@ RUN yum -y install openstack-keystone \
     && yum clean all
 
 RUN mkdir -p /var/www/cgi-bin/keystone \
+    && cp -a /usr/share/keystone/keystone-dist-paste.ini /etc/keystone/keystone-paste.ini \
     && cp -a /usr/share/keystone/keystone.wsgi /var/www/cgi-bin/keystone/main \
     && cp -a /usr/share/keystone/keystone.wsgi /var/www/cgi-bin/keystone/admin \
     && chown -R keystone: /var/www/cgi-bin/keystone \
@@ -26,11 +27,11 @@ RUN zypper -n install openstack-keystone \
         apache2-mod_wsgi \
     && zypper clean -a
 
-RUN mkdir -p /srv/www/cgi-bin/keystone \
-    && cp -a /usr/bin/keystone-wsgi-public /srv/www/cgi-bin/keystone/main \
-    && cp -a /usr/bin/keystone-wsgi-admin /srv/www/cgi-bin/keystone/admin \
-    && chown -R keystone: /srv/www/cgi-bin/keystone \
-    && chmod 755 /srv/www/cgi-bin/keystone/* \
+RUN mkdir -p /var/www/cgi-bin/keystone \
+    && cp -a /usr/bin/keystone-wsgi-public /var/www/cgi-bin/keystone/main \
+    && cp -a /usr/bin/keystone-wsgi-admin /var/www/cgi-bin/keystone/admin \
+    && chown -R keystone: /var/www/cgi-bin/keystone \
+    && chmod 755 /var/www/cgi-bin/keystone/* \
     && sed -i -r 's,^(Listen 80),#\1,' /etc/apache2/listen.conf
 
     {% elif base_distro in ['ubuntu'] %}
@@ -80,6 +81,15 @@ RUN ln -s keystone-source/* keystone \
     && chmod 755 /var/www/cgi-bin/keystone/*
 
 {% endif %}
+
+# NOTE(SamYaple): This is to reintroduce a deprecated option as a quick-fix
+# until the correct new procedure is implemented.
+# TODO(SamYaple): Replace this with `keystone-manage bootstrap`
+RUN sed -i 's|token_auth json_body|token_auth admin_token_auth json_body|g' /etc/keystone/keystone-paste.ini
+
+RUN usermod -a -G kolla keystone \
+    && chown -R keystone: /var/www/cgi-bin/keystone \
+    && chmod 755 /var/www/cgi-bin/keystone/*
 
 COPY extend_start.sh /usr/local/bin/kolla_extend_start
 RUN chmod 755 /usr/local/bin/kolla_extend_start

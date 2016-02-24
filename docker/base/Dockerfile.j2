@@ -161,6 +161,9 @@ RUN zypper addrepo obs://Cloud:OpenStack:Liberty/$KOLLA_OBS_DISTRO OpenStack-Lib
     && zypper --gpg-auto-import-keys ref -s \
     && zypper clean -a
 
+    {% endif %}
+    {# Endif for install_type binary #}
+
 # Install base packages
 RUN zypper -n install \
         curl \
@@ -172,10 +175,8 @@ RUN zypper -n install \
         python-jinja2 \
         python-kazoo \
         python-six \
+        tar \
     && zypper clean -a
-
-    {% endif %}
-    {# Endif for install_type binary #}
 
 {% elif base_distro in ['ubuntu', 'debian'] %}
 

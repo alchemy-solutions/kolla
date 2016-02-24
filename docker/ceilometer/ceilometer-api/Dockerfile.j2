@@ -9,7 +9,8 @@ RUN yum install -y openstack-ceilometer-api \
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
-RUN zypper -n install openstack-ceilometer-api \
+RUN zypper -n install \
+        openstack-ceilometer-api \
     && zypper clean -a
 
     {% elif base_distro in ['ubuntu'] %}

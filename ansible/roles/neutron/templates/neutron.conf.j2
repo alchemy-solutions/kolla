@@ -3,15 +3,21 @@
 [DEFAULT]
 debug = {{ neutron_logging_debug }}
 
-use_syslog = True
-syslog_log_facility = LOG_LOCAL0
+log_dir = /var/log/kolla/neutron
+
+# NOTE(elemoine): set use_stderr to False or the logs will also be sent to
+# stderr and collected by Docker
+use_stderr = False
 
 bind_host = {{ hostvars[inventory_hostname]['ansible_' + api_interface]['ipv4']['address'] }}
 bind_port = {{ neutron_server_port }}
 
-#lock_path = /var/lock/neutron
-api_paste_config = {{ config_dir }}/neutron/api-paste.ini
+api_paste_config = /usr/share/neutron/api-paste.ini
 
+# NOTE(SamYaple): We must specify this value here rather than the metadata conf
+# because it is used by the l3 and dhcp agents. The reason the path has 'kolla'
+# in it is because we are sharing this socket in a volume which is it's own dir
+metadata_proxy_socket = /var/lib/neutron/kolla/metadata_proxy
 
 {% if neutron_plugin_agent == "openvswitch" %}
 interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
@@ -29,7 +35,7 @@ core_plugin = ml2
 service_plugins = router
 
 [nova]
-auth_url = http://{{ kolla_internal_address }}:{{ keystone_admin_port }}
+auth_url = {{ internal_protocol }}://{{ kolla_internal_address }}:{{ keystone_admin_port }}
 auth_type = password
 project_domain_id = default
 user_domain_id = default
@@ -54,8 +60,8 @@ root_helper = sudo neutron-rootwrap /etc/neutron/rootwrap.conf
 connection = mysql+pymysql://{{ neutron_database_user }}:{{ neutron_database_password }}@{{ neutron_database_address }}/{{ neutron_database_name }}
 
 [keystone_authtoken]
-auth_uri = http://{{ kolla_internal_address }}:{{ keystone_public_port }}
-auth_url = http://{{ kolla_internal_address }}:{{ keystone_admin_port }}
+auth_uri = {{ internal_protocol }}://{{ kolla_internal_address }}:{{ keystone_public_port }}
+auth_url = {{ admin_protocol }}://{{ kolla_internal_address }}:{{ keystone_admin_port }}
 auth_type = password
 project_domain_id = default
 user_domain_id = default

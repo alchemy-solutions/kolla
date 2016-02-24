@@ -8,11 +8,17 @@ RUN yum -y install \
         openstack-aodh-common \
     && yum clean all
 
-    {% elif base_distro == 'sles' %}
+    {% elif base_distro in ['opensuse', 'sles'] %}
 
 RUN zypper -n install \
         openstack-aodh \
     && zypper clean -a
+
+    {% elif base_distro in ['ubuntu'] %}
+
+RUN apt-get install -y --no-install-recommends \
+        aodh-common \
+    && apt-get clean
 
     {% endif %}
 

@@ -7,6 +7,18 @@ MAINTAINER {{ maintainer }}
 RUN yum -y install openstack-swift \
     && yum clean all
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        openstack-swift \
+    && zypper clean -a
+
+    {% elif base_distro in ['ubuntu'] %}
+
+RUN apt-get install -y --no-install-recommends \
+        swift \
+    && apt-get clean
+
     {% endif %}
 {% elif install_type == 'source' %}
     {% if base_distro in ['centos', 'fedora', 'oraclelinux', 'rhel'] %}

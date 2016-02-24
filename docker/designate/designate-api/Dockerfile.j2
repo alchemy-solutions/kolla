@@ -5,13 +5,20 @@ MAINTAINER {{ maintainer }}
     {% if base_distro in ['centos', 'fedora', 'oraclelinux', 'rhel'] %}
 
 RUN yum install -y \
-    openstack-designate-api \
+        openstack-designate-api \
     && yum clean all
 
     {% elif base_distro in ['opensuse', 'sles'] %}
 
-RUN echo 'ERROR: {{ install_type }} is unavailable for {{ base_distro }}' \
-    && /bin/false
+RUN zypper -n install \
+        openstack-designate-api \
+    && zypper clean -a
+
+    {% elif base_distro in ['ubuntu'] %}
+
+RUN apt-get install -y --no-install-recommends \
+        designate-api \
+    && apt-get clean
 
     {% endif %}
 {% endif %}
