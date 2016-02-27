@@ -1,6 +1,7 @@
 {% set keystone_cmd = 'apache2' if kolla_base_distro in ['ubuntu', 'debian'] else 'httpd' %}
 {% set keystone_dir = 'httpd' if kolla_base_distro in ['fedora', 'centos', 'oraclelinux', 'rhel'] else 'apache2' %}
 {% set conf_dir = 'conf-enable' if kolla_base_distro in ['ubuntu', 'debian'] else 'conf.d' %}
+{% set conf_dir = 'vhosts.d' if kolla_base_distro in ['opensuse', 'sles'] %}
 {
     "command": "/usr/sbin/{{ keystone_cmd }}",
     "config_files": [

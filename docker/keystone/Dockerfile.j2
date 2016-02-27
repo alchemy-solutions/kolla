@@ -34,6 +34,9 @@ RUN mkdir -p /var/www/cgi-bin/keystone \
     && chmod 755 /var/www/cgi-bin/keystone/* \
     && sed -i -r 's,^(Listen 80),#\1,' /etc/apache2/listen.conf
 
+RUN echo "LoadModule version_module /usr/lib64/apache2/mod_version.so" >>/etc/apache2/conf.d/keystone_modules.conf \
+    && echo "LoadModule wsgi_module /usr/lib64/apache2/mod_wsgi.so" >>/etc/apache2/conf.d/keystone_modules.conf
+
     {% elif base_distro in ['ubuntu'] %}
 
 RUN apt-get install -y --no-install-recommends \
