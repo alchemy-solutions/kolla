@@ -41,6 +41,8 @@ Commands:
     deploy       Deploy and start all kolla containers
     post-deploy  Do post deploy on deploy node
     pull         Pull all images for containers (only pulls, no runnnig container changes)
+    reconfigure  Reconfigure OpenStack service
+    certificates Generate self-signed certificate for TLS *For Development Only*
 EOF
 }
 
@@ -133,7 +135,14 @@ case "$1" in
         ACTION="Upgrading OpenStack Environment"
         EXTRA_OPTS="$EXTRA_OPTS -e action=upgrade"
         ;;
-
+(reconfigure)
+        ACTION="Reconfigure OpenStack service"
+        EXTRA_OPTS="$EXTRA_OPTS -e action=reconfigure"
+        ;;
+(certificates)
+        ACTION="Generate TLS Certificates"
+        PLAYBOOK="${BASEDIR}/ansible/certificates.yml"
+        ;;
 (*)     usage
         exit 0
         ;;

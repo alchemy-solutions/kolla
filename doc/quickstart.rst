@@ -1,5 +1,5 @@
-Bare Metal Deployment of Kolla
-==============================
+Deployment of Kolla on Bare Metal or Virtual Machine
+====================================================
 
 Evaluation and Developer Environments
 -------------------------------------
@@ -8,25 +8,25 @@ Two virtualized evaluation and development environment options are
 available. These options permit the evaluation of Kolla without
 disrupting the host operating system.
 
-If developing or evaluating Kolla on an OpenStack cloud environment that
-supports Heat, follow the :doc:`Heat evaluation and developer environment
-guide <heat-dev-env>`.
+If developing or evaluating Kolla on an OpenStack cloud
+environment that supports Heat, follow the :doc:`Heat evaluation
+and developer environment guide <heat-dev-env>`.
 
-If developing or evaluating Kolla on a system that provides VirtualBox or
-Libvirt in addition to Vagrant, use the Vagrant virtual environment documented
-in :doc:`Vagrant evaluation and
+If developing or evaluating Kolla on a system that provides
+VirtualBox or Libvirt in addition to Vagrant, use the Vagrant virtual
+environment documented in :doc:`Vagrant evaluation and
 developer environment guide <vagrant-dev-env>`.
 
-If evaluating or deploying OpenStack on bare-metal with Kolla, follow the
-instructions in this document to get started.
+If evaluating or deploying OpenStack on bare-metal with Kolla,
+follow the instructions in this document to get started.
 
 Host machine requirements
 -------------------------
 
 The recommended deployment target requirements:
 
-- Two network interfaces.
-- More than 8gb main memory.
+- 2 (or more) network interfaces.
+- At least 8gb main memory
 - At least 40gb disk space.
 
 .. NOTE:: Some commands below may require root permissions (e.g. pip, apt-get).
@@ -44,7 +44,7 @@ these images because a dependent package supermin in CentOS needs to be
 updated to add .xz compressed format support.
 
 Ubuntu: For Ubuntu based systems where Docker is used it is recommended to use
-the latest available lts kernel. The latest lts kernel available is the wily
+the latest available LTS kernel. The latest LTS kernel available is the wily
 kernel (version 4.2). While all kernels should work for Docker, some older
 kernels may have issues with some of the different Docker backends such as AUFS
 and OverlayFS. In order to update kernel in Ubuntu 14.04 LTS to 4.2, run:
@@ -66,7 +66,7 @@ Docker Python           1.6.0        none         On target nodes
 Python Jinja2           2.6.0        none         On deployment host
 =====================   ===========  ===========  =========================
 
-Make sure "pip" package manager is installed before procceed:
+Make sure the "pip" package manager is installed before proceeding:
 
 ::
 
@@ -76,11 +76,16 @@ Make sure "pip" package manager is installed before procceed:
     # Ubuntu 14.04 LTS
     apt-get install python-pip
 
-To install Kolla tools and Python dependencies use:
+To clone the Kolla repo, install git and use:
 
 ::
 
     git clone https://git.openstack.org/openstack/kolla
+
+To install Kolla tools and Python dependencies use:
+
+::
+
     pip install kolla/
 
 Copy Kolla configuration to /etc:
@@ -90,42 +95,30 @@ Copy Kolla configuration to /etc:
     cp -r kolla/etc/kolla /etc/
 
 Since Docker is required to build images as well as be present on all deployed
-targets, the Kolla community recommends installing the Docker Inc. packaged
-version of Docker for maximum stability and compatibility with the following
-command:
+targets, the Kolla community recommends installing the official Docker, Inc.
+packaged version of Docker for maximum stability and compatibility with the
+following command:
 
 ::
 
     curl -sSL https://get.docker.io | bash
 
 This command will install the most recent stable version of Docker, but please
-note what Kolla releases are not in sync with docker in any way, so some things
-could stop working with new version. Kolla release 1.0.0-liberty tested to
-work with docker 1.8.2, to check you docker version run this command:
+note that Kolla releases are not in sync with docker in any way, so some things
+could stop working with new version. The latest release of Kolla is tested to
+work with docker-engine >= 1.10.0. To check your docker version run this
+command:
 
 ::
 
     docker --version
 
-Docker 1.8.3 and later are incompatible with Kolla Liberty. Versions greater
-than 1.8.2 are functional with master branch (Mitaka). If the version installed
-is 1.8.3 or later and you are running Liberty, downgrade using these commands:
-
-::
-
-    # Centos 7
-    yum downgrade docker-engine-1.8.2
-    systemctl restart docker.service
-
-    # Ubuntu 14.04 LTS
-    apt-get install docker-engine=1.8.2-0~trusty
-
-When running with systemd you must setup docker-engine with the appropriate
+When running with systemd, setup docker-engine with the appropriate
 information in the Docker daemon to launch with. This means setting up the
 following information in the docker.service file. If you do not set the
-MountFlags option correctly then Kolla-Ansible will fail to deploy on
-neutron-dhcp-agent container. After changing the service file you must reload
-and restart the docker service:
+MountFlags option correctly then Kolla-Ansible will fail to deploy the
+neutron-dhcp-agent container and throws APIError/HTTPError. After changing the
+service file, reload and restart the docker service:
 
 ::
 
@@ -208,7 +201,10 @@ packaging if the distro packaging has recommended version available.
 
 Some implemented distro versions of Ansible are too old to use distro
 packaging.  Currently, CentOS and RHEL package Ansible 1.9.4 which is
-suitable for use with Kolla.
+suitable for use with Kolla. Note that you will need to enable access
+to the EPEL repository to install via yum -- to do so, take a look at
+Fedora's EPEL `docs <https://fedoraproject.org/wiki/EPEL>`__ and
+`FAQ <https://fedoraproject.org/wiki/EPEL/FAQ>`__.
 
 On CentOS or RHEL systems, this can be done using:
 
@@ -456,6 +452,14 @@ Run the deployment:
 
     kolla-ansible deploy
 
+If APIError/HTTPError is received from the neutron-dhcp-agent container,
+remove the container and recreate it:
+
+::
+
+    docker rm -v -f neutron_dhcp_agent
+    kolla-ansible deploy
+
 In order to see all available parameters, run:
 
 ::
@@ -467,7 +471,7 @@ deployment takes 25 minutes. These are estimates; different hardware may be
 faster or slower but should be near these results.
 
 After successful deployment of OpenStack, the Horizon dashboard will be
-available by entering IP addr or hostname from "kolla_external_address",
+available by entering IP address or hostname from "kolla_external_address",
 or kolla_internal_address in case then kolla_external_address uses
 kolla_internal_address.
 
@@ -490,6 +494,46 @@ environment with a glance image and neutron networks:
     source /etc/kolla/admin-openrc.sh
     kolla/tools/init-runonce
 
+Failures
+--------
+
+Nearly always when Kolla fails, it is caused by a CTRL-C during the
+deployment process or a problem in the globals.yml configuration.
+
+To correct the problem where Operators have a misconfigured
+environment, the Kolla developers have added a precheck feature which
+ensures the deployment targets are in a state where Kolla may deploy
+to them.  To run the prechecks, execute:
+
+::
+    kolla-ansible prechecks
+
+If a failure during deployment occurs it nearly always occurs during
+evaluation of the software.  Once the Operator learns the few
+configuration options required, it is highly unlikely they will experience
+a failure in deployment.
+
+Deployment may be run as many times as desired, but if a failure in a
+bootstrap task occurs, a further deploy action will not correct the problem.
+In this scenario, Kolla's behavior is undefined.
+
+The fastest way during evaluation to recover from a deployment failure is to
+remove the failed deployment:
+
+On each node where OpenStack is deployed run:
+
+::
+
+    tools/cleanup-containers
+    tools/cleanup-host
+
+The Operator will have to copy via scp or some other means the cleanup
+scripts to the various nodes where the failed containers are located.
+
+The kolla community has separate commands planned for Mitaka for
+reconfiguring the services and upgrading them.  These should be used when
+they are available instead of the deploy operation.
+
 Debugging Kolla
 ---------------
 
@@ -507,10 +551,10 @@ The logs can be examined by executing:
 
 ::
 
-    docker exec -it rsyslog bash
+    docker exec -it heka bash
 
 The logs from all services in all containers may be read from
-/var/log/SERVICE_NAME
+/var/log/kolla/SERVICE_NAME
 
 If the stdout logs are needed, please run:
 
@@ -518,8 +562,8 @@ If the stdout logs are needed, please run:
 
     docker logs <container-name>
 
-Note that some of the containers don't log to stdout at present so the above
-command will provide no information.
+Note that most of the containers don't log to stdout so the above command will
+provide no information.
 
 To learn more about Docker command line operation please refer to `Docker
 documentation <https://docs.docker.com/reference/commandline/cli/>`__.
