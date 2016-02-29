@@ -4,21 +4,20 @@ Deployment of Kolla on Bare Metal or Virtual Machine
 Evaluation and Developer Environments
 -------------------------------------
 
-Two virtualized evaluation and development environment options are
-available. These options permit the evaluation of Kolla without
-disrupting the host operating system.
+Two virtualized development environment options are available for Kolla.
+These options permit the development of Kolla without disrupting the host
+operating system.
 
-If developing or evaluating Kolla on an OpenStack cloud
-environment that supports Heat, follow the :doc:`Heat evaluation
-and developer environment guide <heat-dev-env>`.
+If developing Kolla on an OpenStack cloud environment that supports Heat,
+follow the :doc:`Heat developer environment guide <heat-dev-env>`.
 
-If developing or evaluating Kolla on a system that provides
-VirtualBox or Libvirt in addition to Vagrant, use the Vagrant virtual
-environment documented in :doc:`Vagrant evaluation and
-developer environment guide <vagrant-dev-env>`.
+If developing Kolla on a system that provides VirtualBox or Libvirt in addition
+to Vagrant, use the Vagrant virtual environment documented in
+:doc:`Vagrant developer environment guide <vagrant-dev-env>`.
 
-If evaluating or deploying OpenStack on bare-metal with Kolla,
-follow the instructions in this document to get started.
+If evaluating Kolla, the community strongly recommends using bare metal or a
+virtual machine during the evaluation period. Follow the instructions in this
+document to get started with deploying OpenStack on bare metal with Kolla.
 
 Host machine requirements
 -------------------------
@@ -385,15 +384,13 @@ All variables for the environment can be specified in the files:
 Start by editing /etc/kolla/globals.yml. Check and edit, if needed, these
 parameters: kolla_base_distro, kolla_install_type.
 
-The kolla\_\*\_address variables can both be the same. Please specify
-an unused IP address in the network to act as a VIP for
-kolla\_internal\_address. The VIP will be used with keepalived and
+Please specify an unused IP address in the network to act as a VIP for
+kolla\_internal\_vip\_address. The VIP will be used with keepalived and
 added to the "api\_interface" as specified in the globals.yml
 
 ::
 
-    kolla_external_address: "openstack.example.com"
-    kolla_internal_address: "10.10.10.254"
+    kolla_internal_vip_address: "10.10.10.254"
 
 If the environment doesn't have a free IP address available for VIP
 configuration, the host's IP address may be used here by disabling HAProxy by
@@ -471,9 +468,9 @@ deployment takes 25 minutes. These are estimates; different hardware may be
 faster or slower but should be near these results.
 
 After successful deployment of OpenStack, the Horizon dashboard will be
-available by entering IP address or hostname from "kolla_external_address",
-or kolla_internal_address in case then kolla_external_address uses
-kolla_internal_address.
+available by entering IP address or hostname from kolla\_external\_fqdn, or
+kolla\_internal\_fqdn. If these variables were not set during deploy they
+default to kolla\_internal\_vip\_address.
 
 Useful tools
 -------------
