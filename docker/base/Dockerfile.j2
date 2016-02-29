@@ -148,8 +148,6 @@ RUN yum -y install \
 
     {% if install_type == 'binary' %}
 
-RUN echo 'gpgcheck = false' >>/etc/zypp/zypp.conf
-
     {% if base_distro == 'opensuse' %}
 ENV KOLLA_OBS_DISTRO openSUSE_Leap_42.1
     {% elif base_distro == 'sles' %}

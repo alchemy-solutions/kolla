@@ -16,7 +16,8 @@ RUN yum -y install \
 ENV JAVA_HOME /usr/lib64/jvm/java-1.7.0-openjdk-1.7.0/
 
 # FIXME: elasticsearch 2.1.1 not present in OBS
-RUN zypper -n install \
+RUN rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch \
+    && zypper -n install \
         java-1_7_0-openjdk \
         https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/rpm/elasticsearch/2.1.1/elasticsearch-2.1.1.rpm \
     && zypper clean -a

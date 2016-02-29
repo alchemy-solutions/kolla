@@ -11,7 +11,7 @@ RUN yum -y install openstack-ironic-conductor \
 
 RUN zypper -n install \
         openstack-ironic-conductor \
-    && zypper clean all
+    && zypper clean -a
 
     {% elif base_distro in ['ubuntu'] %}
 

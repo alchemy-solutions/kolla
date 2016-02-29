@@ -355,7 +355,7 @@ class KollaWorker(object):
             self.install_metatype = 'rhos'
         elif self.install_type == 'obs':
             self.install_type = 'binary'
-            self.install_metatype = 'rdo'
+            self.install_metatype = 'obs'
         elif self.install_type == 'soc':
             self.install_type = 'binary'
             self.install_metatype = 'soc'
