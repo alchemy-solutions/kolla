@@ -61,6 +61,14 @@ RUN yum -y install \
     && yum clean all \
     && sed -i -r 's,^(Listen 80),#\1,' /etc/httpd/conf/httpd.conf
 
+    {% elif base_distro in ['opensuse', 'sles'] %}
+
+RUN zypper -n install \
+        apache2 \
+        apache2-mod_wsgi \
+    && zypper clean -a \
+    && sed -i -r 's,^(Listen 80),#\1,' /etc/apache2/listen.conf
+
     {% elif base_distro in ['ubuntu', 'debian'] %}
 
 RUN apt-get install -y --no-install-recommends \
